@@ -15,7 +15,7 @@
 // chargée (fonctionne que ce soit localhost, une IP locale changeante, ou
 // un vrai nom de domaine en production). Une IP codée en dur casserait
 // l'application dès que la machine change de réseau ou d'adresse.
-const API_BASE_URL = `https://df6cd9a6301fc0bd600dd10aeef26f57.loophole.site/api`;
+const API_BASE_URL = `https://everybody-random-untangled.ngrok-free.dev/api`;
 //const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:5000/api`;
 
 // --- Gestion du token dans le stockage du navigateur ---
