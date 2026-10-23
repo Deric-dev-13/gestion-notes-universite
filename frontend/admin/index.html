@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace Administrateur - Gestion de Notes</title>
+<script>
+  tailwind = { config: { theme: { extend: { colors: {
+    blue: { 50: '#822522', 100: '#822522', 200: '#822522', 300: '#822522', 400: '#822522', 500: '#822522', 600: '#822522', 700: '#822522', 800: '#822522', 900: '#822522', 950: '#822522' },
+    white: '#B0ACA3'
+  } } } } };
+</script>
+<!--<script src="https://cdn.tailwindcss.com"></script>-->
+<link rel="stylesheet" href="../css/output.css">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="min-h-screen">
+
+  <header class="app-header bg-blue-900 text-white px-6 py-4 flex justify-between items-center shadow">
+    <div class="flex items-center gap-3">
+      <button id="btnMenuMobile" type="button" aria-label="Ouvrir le menu" aria-expanded="false" class="md:hidden flex flex-col gap-1.5 p-2 rounded-lg bg-white/10 shadow border border-white/20 text-white">
+        <span class="block w-6 h-0.5 bg-current rounded"></span>
+        <span class="block w-6 h-0.5 bg-current rounded"></span>
+        <span class="block w-6 h-0.5 bg-current rounded"></span>
+      </button>
+      <div class="flex">
+        <h1 class="text-lg font-bold"></h1>
+        <span id="nomAdmin" class="text-sm"></span>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 md:flex">
+      <span id="notification" class="text-sm inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/10 border border-white/20" title="Notifications">
+        🔔
+      </span>
+      <button id="btnDeconnexion" class="hidden md:inline-flex bg-blue-800 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm">Déconnexion</button>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+
+    <section class="mb-8">
+      <div class="flex items-end justify-between gap-3 mb-4">
+        <div>
+          <p class="text-xs uppercase tracking-wide text-gray-500">Vue d'ensemble</p>
+          <h2 class="text-xl font-semibold text-gray-800">Statistiques de l'université</h2>
+        </div>
+        <button id="btnRafraichirStatistiques" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-sm shadow-sm">Actualiser</button>
+      </div>
+      <div id="cartesStatistiques" class="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div class="col-span-full text-sm text-gray-400">Chargement des statistiques...</div>
+      </div>
+    </section>
+
+    <!-- Onglets -->
+    <nav class="relative mb-6">
+      <div id="ongletsNav" class="flex flex-wrap gap-2">
+        <a href="#page-etudiants"><button data-onglet="etudiants" class="onglet-btn px-4 py-2 rounded-lg bg-blue-900 text-white text-sm">Étudiants</button></a>
+        <a href="#page-enseignants"><button data-onglet="enseignants" class="onglet-btn px-4 py-2 rounded-lg bg-white text-gray-700 text-sm shadow">Enseignants</button></a>
+        <a href="#page-parcours"><button data-onglet="parcours" class="onglet-btn px-4 py-2 rounded-lg bg-white text-gray-700 text-sm shadow">Parcours</button></a>
+        <a href="#page-ue"><button data-onglet="ue" class="onglet-btn px-4 py-2 rounded-lg bg-white text-gray-700 text-sm shadow">Unités d'enseignement</button></a>
+        <a href="#page-ec"><button data-onglet="ec" class="onglet-btn px-4 py-2 rounded-lg bg-white text-gray-700 text-sm shadow">Éléments constitutifs</button></a>
+        <a href="#page-affectations"><button data-onglet="affectations" class="onglet-btn px-4 py-2 rounded-lg bg-white text-gray-700 text-sm shadow">Affectations</button></a>
+        <a href="#page-progression"><button data-onglet="progression" class="onglet-btn px-4 py-2 rounded-lg bg-white text-gray-700 text-sm shadow">Progression / Clôture d'année</button></a>
+        <a href="#page-reinitialisations"><button data-onglet="reinitialisations" class="onglet-btn px-4 py-2 rounded-lg bg-white text-gray-700 text-sm shadow flex items-center gap-1.5">
+          Demandes de réinitialisation
+          <span id="badgeDemandesMdp" class="hidden bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">0</span>
+        </button></a>
+      </div>
+    </nav>
+
+    <div id="messageErreur" class="hidden mb-4"></div>
+    <div id="messageSucces" class="hidden mb-4"></div>
+
+    <!-- ===================== ONGLET ÉTUDIANTS ===================== -->
+    <section id="page-etudiants" class="page-onglet space-y-4">
+      <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="font-semibold text-gray-800 mb-4">Créer un étudiant</h2>
+        <form id="formCreerEtudiant" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input required placeholder="Nom" id="etuNom" class="border rounded-lg px-3 py-2">
+          <input required placeholder="Prénom" id="etuPrenom" class="border rounded-lg px-3 py-2">
+          <input required type="date" id="etuDateNaissance" class="border rounded-lg px-3 py-2">
+          <input id="etuLieuNaissance" maxlength="150" placeholder="Lieu de naissance" class="border rounded-lg px-3 py-2">
+          <select required id="etuSexe" class="border rounded-lg px-3 py-2"><option value="">Sexe</option><option value="M">Masculin</option><option value="F">Féminin</option></select>
+          <input placeholder="CIN" id="etuCin" maxlength="20" class="border rounded-lg px-3 py-2">
+          <input placeholder="Téléphone" id="etuTel" maxlength="20" class="border rounded-lg px-3 py-2">
+          <input required type="email" placeholder="Email" id="etuEmail" class="border rounded-lg px-3 py-2">
+          <input required type="password" placeholder="Mot de passe initial" id="etuMotDePasse" class="border rounded-lg px-3 py-2">
+          <select required id="etuParcours" class="border rounded-lg px-3 py-2"></select>
+          <input placeholder="Année universitaire (ex: 2025-2026, optionnel)" id="etuAnnee" class="border rounded-lg px-3 py-2">
+          <button class="md:col-span-3 bg-blue-900 hover:bg-blue-800 text-white rounded-lg py-2">Créer l'étudiant</button>
+        </form>
+      </div>
+      <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+          <h2 class="font-semibold text-gray-800">Liste des étudiants</h2>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input id="rechercheEtudiants" type="search" placeholder="Rechercher un étudiant..." class="border rounded-lg px-3 py-2 text-sm w-full sm:w-64">
+            <div class="flex gap-2">
+              <button id="btnEtudiantsActifs" type="button" class="bg-blue-900 text-white rounded-lg px-3 py-2 text-sm">Actifs</button>
+              <button id="btnEtudiantsEnAttente" type="button" class="bg-white text-gray-700 border border-gray-200 rounded-lg px-3 py-2 text-sm shadow-sm">En attente</button>
+            </div>
+          </div>
+        </div>
+        <table class="tableau-notes w-full text-sm">
+          <thead><tr>
+            <th class="text-left px-3 py-2">N°</th><th class="text-left px-3 py-2">Nom</th>
+            <th class="text-left px-3 py-2">Profil</th><th class="text-left px-3 py-2">Email</th><th class="text-left px-3 py-2">Parcours</th>
+            <th class="text-left px-3 py-2">Statut</th><th class="text-left px-3 py-2">Actions</th>
+          </tr></thead>
+          <tbody id="corpsTableauEtudiants"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== ONGLET ENSEIGNANTS ===================== -->
+    <section id="page-enseignants" class="page-onglet space-y-4 hidden">
+      <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="font-semibold text-gray-800 mb-4">Créer un enseignant</h2>
+        <form id="formCreerEnseignant" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input required placeholder="Nom" id="ensNom" class="border rounded-lg px-3 py-2">
+          <input required placeholder="Prénom" id="ensPrenom" class="border rounded-lg px-3 py-2">
+          <select required id="ensSexe" class="border rounded-lg px-3 py-2"><option value="">Sexe</option><option value="M">Masculin</option><option value="F">Féminin</option></select>
+          <input required placeholder="Matricule" id="ensMatricule" maxlength="50" class="border rounded-lg px-3 py-2">
+          <input type="date" id="ensDateNaissance" class="border rounded-lg px-3 py-2">
+          <input placeholder="CIN" id="ensCin" maxlength="20" class="border rounded-lg px-3 py-2">
+          <input placeholder="Téléphone" id="ensTel" maxlength="20" class="border rounded-lg px-3 py-2">
+          <input placeholder="Diplôme" id="ensDiplome" maxlength="100" class="border rounded-lg px-3 py-2">
+          <input placeholder="Grade" id="ensGrade" maxlength="100" class="border rounded-lg px-3 py-2">
+          <input placeholder="Spécialité" id="ensSpecialite" maxlength="100" class="border rounded-lg px-3 py-2">
+          <input placeholder="Établissement d'attache" id="ensMentionEtablissement" maxlength="100" class="border rounded-lg px-3 py-2">
+          <input required type="email" placeholder="Email professionnel" id="ensEmail" class="border rounded-lg px-3 py-2">
+          <input required type="password" placeholder="Mot de passe initial" id="ensMotDePasse" class="border rounded-lg px-3 py-2">
+          <select id="ensParcoursDirige" class="border rounded-lg px-3 py-2">
+            <option value="">Directeur de parcours ? (optionnel)</option>
+          </select>
+          <button class="md:col-span-3 bg-blue-900 hover:bg-blue-800 text-white rounded-lg py-2">Créer l'enseignant</button>
+        </form>
+      </div>
+      <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+          <h2 class="font-semibold text-gray-800">Liste des enseignants</h2>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input id="rechercheEnseignants" type="search" placeholder="Rechercher un enseignant..." class="border rounded-lg px-3 py-2 text-sm w-full sm:w-64">
+            <div class="flex gap-2">
+              <button id="btnEnseignantsActifs" type="button" class="bg-blue-900 text-white rounded-lg px-3 py-2 text-sm">Actifs</button>
+              <button id="btnEnseignantsEnAttente" type="button" class="bg-white text-gray-700 border border-gray-200 rounded-lg px-3 py-2 text-sm shadow-sm">En attente</button>
+            </div>
+          </div>
+        </div>
+        <table class="tableau-notes w-full text-sm">
+          <thead><tr>
+            <th class="text-left px-3 py-2">ID</th><th class="text-left px-3 py-2">Nom</th>
+            <th class="text-left px-3 py-2">Profil</th><th class="text-left px-3 py-2">Email</th><th class="text-left px-3 py-2">Statut</th>
+            <th class="text-left px-3 py-2">Actions</th>
+          </tr></thead>
+          <tbody id="corpsTableauEnseignants"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== ONGLET PARCOURS ===================== -->
+    <section id="page-parcours" class="page-onglet space-y-4 hidden">
+      <div class="bg-white rounded-xl shadow p-6">
+        <h2 id="titreFormulaireParcours" class="font-semibold text-gray-800 mb-4">Créer un parcours</h2>
+        <form id="formCreerParcours" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input required placeholder="Nom du parcours (ex: GMI - Informatique)" id="parNom" class="border rounded-lg px-3 py-2">
+          <select required id="parNiveau" class="border rounded-lg px-3 py-2">
+            <option value="L1">L1</option><option value="L2">L2</option><option value="L3">L3</option>
+            <option value="M1">M1</option><option value="M2">M2</option>
+          </select>
+          <input required placeholder="Mention" id="parMention" class="border rounded-lg px-3 py-2">
+          <select id="parResponsableParcours" class="border rounded-lg px-3 py-2"><option value="">Responsable du parcours (optionnel)</option></select>
+          <select id="parResponsableMention" class="border rounded-lg px-3 py-2"><option value="">Responsable de la mention (optionnel)</option></select>
+          <div class="md:col-span-3 flex gap-2">
+            <button id="btnEnregistrerParcours" class="flex-1 bg-blue-900 hover:bg-blue-800 text-white rounded-lg py-2">Créer le parcours</button>
+            <button id="btnAnnulerModificationParcours" type="button" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg px-4 py-2">Annuler</button>
+          </div>
+        </form>
+      </div>
+      <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+          <h2 class="font-semibold text-gray-800">Liste des parcours</h2>
+          <input id="rechercheParcours" type="search" placeholder="Rechercher un parcours..." class="border rounded-lg px-3 py-2 text-sm w-full md:w-72">
+        </div>
+        <table class="tableau-notes w-full text-sm">
+          <thead><tr>
+            <th class="text-left px-3 py-2">ID</th><th class="text-left px-3 py-2">Nom</th>
+            <th class="text-left px-3 py-2">Niveau</th><th class="text-left px-3 py-2">Mention</th>
+            <th class="text-left px-3 py-2">Actions</th>
+          </tr></thead>
+          <tbody id="corpsTableauParcours"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== ONGLET UE ===================== -->
+    <section id="page-ue" class="page-onglet space-y-4 hidden">
+      <div class="bg-white rounded-xl shadow p-6">
+        <h2 id="titreFormulaireUE" class="font-semibold text-gray-800 mb-4">Créer une unité d'enseignement</h2>
+        <form id="formCreerUE" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input placeholder="Code UE (optionnel, ex: ALGMTH02)" id="ueCode" class="border rounded-lg px-3 py-2">
+          <input required placeholder="Nom de l'UE" id="ueNom" class="border rounded-lg px-3 py-2">
+          <input required type="number" step="0.5" min="0" placeholder="Coefficient" id="ueCoefficient" class="border rounded-lg px-3 py-2">
+          <select required id="ueNiveau" class="border rounded-lg px-3 py-2">
+            <option value="L1">L1</option><option value="L2">L2</option><option value="L3">L3</option>
+            <option value="M1">M1</option><option value="M2">M2</option>
+          </select>
+          <input required placeholder="Semestre (ex: S1, S7...)" id="ueSemestre" class="border rounded-lg px-3 py-2">
+          <select required id="ueParcours" class="border rounded-lg px-3 py-2"></select>
+          <div class="md:col-span-3 flex gap-2">
+            <button id="btnEnregistrerUE" class="flex-1 bg-blue-900 hover:bg-blue-800 text-white rounded-lg py-2">Créer UE et rattacher au parcours</button>
+            <button id="btnAnnulerModificationUE" type="button" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg px-4 py-2">Annuler</button>
+          </div>
+        </form>
+      </div>
+      <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+          <h2 class="font-semibold text-gray-800">Liste des UE (catalogue, réutilisé chaque année)</h2>
+          <input id="rechercheUE" type="search" placeholder="Rechercher une UE..." class="border rounded-lg px-3 py-2 text-sm w-full md:w-72">
+        </div>
+        <table class="tableau-notes w-full text-sm">
+          <thead><tr>
+            <th class="text-left px-3 py-2">ID</th><th class="text-left px-3 py-2">Code</th>
+            <th class="text-left px-3 py-2">Nom</th><th class="text-left px-3 py-2">Niveau</th>
+            <th class="text-left px-3 py-2">Semestre</th><th class="text-left px-3 py-2">Coefficient</th><th class="text-left px-3 py-2">Actions</th>
+          </tr></thead>
+          <tbody id="corpsTableauUE"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== ONGLET EC ===================== -->
+    <section id="page-ec" class="page-onglet space-y-4 hidden">
+      <div class="bg-white rounded-xl shadow p-6">
+        <h2 id="titreFormulaireEC" class="font-semibold text-gray-800 mb-4">Créer un élément constitutif</h2>
+        <p class="text-xs text-gray-400 mb-3">
+          Le catalogue EC est indépendant de l'année universitaire : il est
+          défini une fois et réutilisé chaque année (ce sont les notes qui
+          portent l'année, pas l'EC).
+        </p>
+        <form id="formCreerEC" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input required placeholder="Nom de l'EC (ex: Algorithmique)" id="ecNom" class="border rounded-lg px-3 py-2">
+          <input required type="number" step="0.5" min="0.5" placeholder="Crédits" id="ecCredit" class="border rounded-lg px-3 py-2">
+          <select required id="ecUE" class="border rounded-lg px-3 py-2"></select>
+          <div class="flex gap-2">
+            <button id="btnEnregistrerEC" class="flex-1 bg-blue-900 hover:bg-blue-800 text-white rounded-lg py-2">Créer l'EC</button>
+            <button id="btnAnnulerModificationEC" type="button" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg px-4 py-2">Annuler</button>
+          </div>
+        </form>
+      </div>
+      <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+          <h2 class="font-semibold text-gray-800">Liste des EC</h2>
+          <input id="rechercheEC" type="search" placeholder="Rechercher un EC..." class="border rounded-lg px-3 py-2 text-sm w-full md:w-72">
+        </div>
+        <table class="tableau-notes w-full text-sm">
+          <thead><tr>
+            <th class="text-left px-3 py-2">ID</th><th class="text-left px-3 py-2">Nom</th>
+            <th class="text-left px-3 py-2">UE</th><th class="text-left px-3 py-2">Niveau</th>
+            <th class="text-left px-3 py-2">Semestre</th><th class="text-left px-3 py-2">Crédits</th><th class="text-left px-3 py-2">Actions</th>
+          </tr></thead>
+          <tbody id="corpsTableauEC"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== ONGLET AFFECTATIONS ===================== -->
+    <section id="page-affectations" class="page-onglet space-y-4 hidden">
+      <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="font-semibold text-gray-800 mb-4">Affecter un enseignant à un élément constitutif</h2>
+        <form id="formAffecterEnseignant" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <select required id="affEnseignant" class="border rounded-lg px-3 py-2"></select>
+          <select required id="affEC" class="border rounded-lg px-3 py-2"></select>
+          <button class="bg-blue-900 hover:bg-blue-800 text-white rounded-lg py-2">Affecter</button>
+        </form>
+      </div>
+      <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="font-semibold text-gray-800 mb-4">Inscrire un étudiant dans un parcours</h2>
+        <form id="formInscrireEtudiant" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <select required id="insEtudiant" class="border rounded-lg px-3 py-2"></select>
+          <select required id="insParcours" class="border rounded-lg px-3 py-2"></select>
+          <button class="bg-blue-900 hover:bg-blue-800 text-white rounded-lg py-2">Inscrire</button>
+        </form>
+      </div>
+      <div class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+        <div class="flex items-center justify-between gap-3 mb-4">
+          <button id="btnRafraichirAffectations" class="text-blue-900 hover:underline text-sm">Actualiser</button>
+        </div>
+        <input id="rechercheAffectations" type="search" placeholder="Rechercher un enseignant, un EC ou une UE..." class="border rounded-lg px-3 py-2 text-sm w-full mb-4">
+        <table class="tableau-notes w-full text-sm">
+          <thead><tr>
+            <th class="text-left px-3 py-2">Enseignant</th>
+            <th class="text-left px-3 py-2">EC</th>
+            <th class="text-left px-3 py-2">UE</th>
+            <th class="text-left px-3 py-2">Action</th>
+          </tr></thead>
+          <tbody id="corpsTableauAffectations"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== ONGLET PROGRESSION / CLOTURE D'ANNEE ===================== -->
+    <section id="page-progression" class="page-onglet space-y-4 hidden">
+
+      <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="font-semibold text-gray-800 mb-2">Inscrire / mettre à jour une année universitaire</h2>
+        <p class="text-xs text-gray-400 mb-3">
+          Crée (ou met à jour) la ligne d'historique d'un étudiant pour une
+          année universitaire donnée : c'est ce qui lui permet d'avoir un
+          relevé de notes calculable pour cette année-là. Utile pour
+          rattraper une inscription oubliée ou corriger un parcours.
+        </p>
+        <form id="formCreerInscription" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <select required id="insProgEtudiant" class="border rounded-lg px-3 py-2"></select>
+          <select required id="insProgParcours" class="border rounded-lg px-3 py-2"></select>
+          <input required placeholder="Année universitaire (ex: 2025-2026)" id="insProgAnnee" class="border rounded-lg px-3 py-2">
+          <button class="bg-blue-900 hover:bg-blue-800 text-white rounded-lg py-2">Enregistrer l'inscription</button>
+        </form>
+      </div>
+
+      <!-- Clôture globale de l'année pour tous les étudiants -->
+      <div class="bg-white rounded-xl shadow p-6 border-l-4 border-blue-900">
+        <h2 class="font-semibold text-gray-800 mb-2 flex items-center gap-2">
+          <span>🎓</span> Clôture globale de l'année académique (Promotion et Redoublement automatiques)
+        </h2>
+        <p class="text-xs text-gray-500 mb-4">
+          Le système calcule automatiquement les moyennes des 2 semestres pour <strong>tous les étudiants</strong> inscrits pour cette année :
+          ceux qui ont validé passent automatiquement au niveau supérieur (ex: L1 &rarr; L2 &rarr; L3 &rarr; M1 &rarr; M2) pour l'année suivante,
+          avec ouverture automatique des dettes si nécessaire. Les étudiants non admis sont automatiquement inscrits en redoublement.
+        </p>
+        <form id="formClotureGlobale" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-xs text-gray-600 mb-1">Année académique à clôturer</label>
+            <select id="clotGlobaleAnnee" required class="w-full border rounded-lg px-3 py-2 text-sm"></select>
+          </div>
+          <div class="flex items-end">
+            <button type="submit" id="btnLancerClotureGlobale" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-medium rounded-lg py-2 text-sm transition shadow">
+               Clôturer l'année
+            </button>
+          </div>
+        </form>
+        <div id="resultatClotureGlobale" class="hidden mt-4 p-4 rounded-lg bg-blue-50 text-sm border border-blue-200"></div>
+      </div>
+
+      <!--<div class="bg-white rounded-xl shadow p-6">
+        <h2 class="font-semibold text-gray-800 mb-2">Clôturer individuellement un étudiant</h2>
+        <p class="text-xs text-gray-400 mb-3">
+          Calcule le résultat final de l'année choisie, détermine <strong>Admis</strong> / <strong>Admis avec dette</strong> / <strong>Redouble</strong>,
+          et promeut automatiquement au niveau supérieur (ou maintient en redoublement).
+        </p>
+        <form id="formClotureAnnee" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <select required id="clotEtudiant" class="border rounded-lg px-3 py-2"></select>
+          <select id="clotAnnee" required class="border rounded-lg px-3 py-2"></select>
+          <select id="clotParcoursSuivant" class="border rounded-lg px-3 py-2">
+            <option value="">Parcours suivant (détection auto si vide)</option>
+          </select>
+          <button class="bg-blue-900 hover:bg-blue-800 text-white rounded-lg py-2">Clôturer l'étudiant</button>
+        </form>
+        <div id="resultatCloture" class="hidden mt-4 p-4 rounded-lg bg-gray-50 text-sm"></div>
+      </div>-->
+
+      <div class="bg-white rounded-xl shadow p-6">
+        <h2 class="font-semibold text-gray-800 mb-2">Consulter l'historique et relevés d'un étudiant</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-2">
+          <select id="histFiltreMention" class="border rounded-lg px-3 py-2"></select>
+          <select id="histFiltreNiveau" class="border rounded-lg px-3 py-2"></select>
+          <select id="histFiltreParcours" class="border rounded-lg px-3 py-2"></select>
+        </div>
+        <p id="histCompteur" class="text-xs text-gray-500 mb-3"></p>
+        <form id="formVoirHistorique" class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <select required id="histEtudiant" class="border rounded-lg px-3 py-2"></select>
+          <button class="bg-blue-900 hover:bg-blue-800 text-white rounded-lg py-2">Afficher</button>
+        </form>
+        <div id="resultatHistorique" class="space-y-3"></div>
+      </div>
+
+    </section>
+
+    <!-- ===================== ONGLET DEMANDES DE RÉINITIALISATION ===================== -->
+    <section id="page-reinitialisations" class="page-onglet space-y-4 hidden">
+      <div class="bg-white rounded-xl shadow p-6">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="font-semibold text-gray-800">Demandes de réinitialisation de mot de passe (Mot de passe oublié)</h2>
+            <p class="text-xs text-gray-500 mt-1">
+              Les utilisateurs envoient leur adresse email et le nouveau mot de passe souhaité. Cliquez sur <strong>Valider & Réinitialiser</strong> pour appliquer le changement et envoyer automatiquement la notification par SMTP.
+            </p>
+          </div>
+          <button id="btnRafraichirDemandes" class="text-blue-900 hover:underline text-xs bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200">
+            🔄 Rafraîchir
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="tableau-notes w-full text-sm">
+            <thead>
+              <tr>
+                <th class="text-left px-3 py-2">ID</th>
+                <th class="text-left px-3 py-2">Email (Gmail)</th>
+                <th class="text-left px-3 py-2">Rôle</th>
+                <th class="text-left px-3 py-2">Nouveau mot de passe</th>
+                <th class="text-left px-3 py-2">Date demande</th>
+                <th class="text-left px-3 py-2">Statut</th>
+                <th class="text-left px-3 py-2">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="corpsTableauDemandes"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

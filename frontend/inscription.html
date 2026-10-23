@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Créer un compte - Gestion de Notes Universitaire</title>
+<script>
+  tailwind = { config: { theme: { extend: { colors: {
+    blue: { 50: '#822522', 100: '#822522', 200: '#822522', 300: '#822522', 400: '#822522', 500: '#822522', 600: '#822522', 700: '#822522', 800: '#822522', 900: '#822522', 950: '#822522' },
+    white: '#B0ACA3'
+  } } } } };
+</script>
+<!--<script src="https://cdn.tailwindcss.com"></script>-->
+<link rel="stylesheet" href="css/output.css">
+<link rel="stylesheet" href="css/style.css">
+<style>
+  .inscription-page {
+    background: radial-gradient(circle at 15% 10%, rgba(130, 37, 34, 0.16), transparent 32%),
+      radial-gradient(circle at 90% 85%, rgba(38, 92, 110, 0.18), transparent 36%), #eef5f8;
+  }
+  .confirmation-shell { animation: confirmation-arrive 700ms cubic-bezier(.2,.8,.2,1) both; }
+  .confirmation-check { animation: confirmation-check 900ms 250ms cubic-bezier(.2,.8,.2,1) both; }
+  .confirmation-ring { animation: confirmation-pulse 2.8s ease-in-out infinite; }
+  .confirmation-step { animation: confirmation-step 600ms both; }
+  .confirmation-step:nth-child(2) { animation-delay: 120ms; }
+  .confirmation-step:nth-child(3) { animation-delay: 240ms; }
+  @keyframes confirmation-arrive { from { opacity: 0; transform: translateY(22px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+  @keyframes confirmation-check { from { opacity: 0; transform: scale(.2) rotate(-25deg); } to { opacity: 1; transform: scale(1) rotate(0); } }
+  @keyframes confirmation-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(130, 37, 34, .2); } 50% { box-shadow: 0 0 0 14px rgba(130, 37, 34, 0); } }
+  @keyframes confirmation-step { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; } }
+</style>
+</head>
+<body class="inscription-page min-h-screen flex items-center justify-center px-4 py-10">
+
+  <div id="inscriptionCard" class="w-full max-w-lg bg-white rounded-2xl shadow-xl p-8">
+    <div class="text-center mb-6">
+      <div class="mx-auto w-14 h-14 rounded-full bg-blue-900 flex items-center justify-center text-white text-2xl font-bold">
+      <img src="photos/logo_note.jpg"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+             style="width:50px; height:50px; border-radius:50%;"
+             alt="Logo Université d'Antsiranana">
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800 mt-4">Créer un compte</h1>
+      <p class="text-gray-500 text-sm mt-1">L'inscription est ouverte aux étudiants et aux enseignants</p>
+    </div>
+
+    <!-- Sélecteur de profil : bascule entre les deux formulaires ci-dessous -->
+    <div class="flex bg-gray-100 rounded-lg p-1 mb-6">
+      <button type="button" id="ongletEtudiant" class="flex-1 py-2 rounded-lg text-sm font-medium bg-blue-900 text-white">
+        Je suis étudiant
+      </button>
+      <button type="button" id="ongletEnseignant" class="flex-1 py-2 rounded-lg text-sm font-medium text-gray-600">
+        Je suis enseignant
+      </button>
+    </div>
+
+    <div id="messageErreur" class="hidden mb-4"></div>
+    <div id="messageSucces" class="hidden mb-4"></div>
+
+    <!-- ===================== FORMULAIRE ÉTUDIANT ===================== -->
+    <form id="formInscriptionEtudiant" class="space-y-4">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+          <input required id="etuNom" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+          <input required id="etuPrenom" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label><input type="date" id="etuDateNaissance" class="w-full border border-gray-300 rounded-lg px-4 py-2"></div>
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Lieu de naissance</label><input id="etuLieuNaissance" maxlength="150" placeholder="Ex. : Marovoay Mahajanga" class="w-full border border-gray-300 rounded-lg px-4 py-2"></div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Sexe</label>
+          <select required id="etuSexe" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="">-- Choisir --</option>
+            <option value="M">Masculin</option>
+            <option value="F">Féminin</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">CIN</label>
+          <input id="etuCin" maxlength="20" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+          <input id="etuTel" maxlength="20" type="tel" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">1. Mention</label>
+          <select required id="etuMention" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+            <option value="">Chargement...</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">2. Niveau</label>
+          <select id="etuNiveau" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+            <option value="">Tous les niveaux</option>
+            <option value="L1">L1</option>
+            <option value="L2">L2</option>
+            <option value="L3">L3</option>
+            <option value="M1">M1</option>
+            <option value="M2">M2</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">3. Parcours</label>
+          <select required id="etuParcours" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white">
+            <option value="">-- Choisir une mention d'abord --</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Année universitaire</label>
+        <select required id="etuAnneeUniversitaire" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+          <option value="">-- Choisir l'année universitaire --</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input required type="email" id="etuEmail" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe (6 caractères minimum)</label>
+        <input required type="password" minlength="6" id="etuMotDePasse" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+      </div>
+      <p class="text-xs text-gray-400">
+        Votre compte sera créé en attente de validation. Un administrateur doit
+        l'activer avant que vous puissiez vous connecter.
+      </p>
+      <button type="submit" id="btnInscrireEtudiant"
+        class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg transition">
+        Créer mon compte étudiant
+      </button>
+    </form>
+
+    <!-- ===================== FORMULAIRE ENSEIGNANT ===================== -->
+    <form id="formInscriptionEnseignant" class="space-y-4 hidden">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+          <input required id="ensNom" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Prénom</label>
+          <input required id="ensPrenom" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Sexe</label>
+          <select required id="ensSexe" class="w-full border border-gray-300 rounded-lg px-3 py-2 bg-white">
+            <option value="">-- Choisir --</option>
+            <option value="M">Masculin</option>
+            <option value="F">Féminin</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Matricule</label>
+          <input required id="ensMatricule" maxlength="50" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Date de naissance</label>
+          <input type="date" id="ensDateNaissance" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">CIN</label>
+          <input id="ensCin" maxlength="20" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+          <input id="ensTel" maxlength="20" type="tel" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Diplôme</label>
+          <input id="ensDiplome" maxlength="100" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Grade</label>
+          <input id="ensGrade" maxlength="100" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Spécialité</label>
+          <input id="ensSpecialite" maxlength="100" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Mention établissement d'attache</label>
+          <input id="ensMentionEtablissement" maxlength="100" placeholder="Exemple : GMI-GC-GM, GMI-GE ou GMI ECT" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 rounded-lg border p-3 bg-gray-50">
+        <div><label class="block text-sm font-medium text-gray-700 mb-1">Responsabiliter</label><select id="ensRoleResponsabilite" class="w-full border rounded-lg px-3 py-2 bg-white"><option value="">Aucune</option><option value="parcours">Responsable de parcours</option><option value="mention">Responsable de mention</option></select></div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Filtrer par mention</label>
+          <select id="ensFiltreMentionResponsabilite" class="w-full border rounded-lg px-3 py-2 bg-white">
+            <option value="">Toutes les mentions</option>
+          </select>
+        </div>
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Parcours / mention concernes</label>
+          <p class="text-xs text-gray-500 mt-1">Coche un ou plusieurs parcours (choisis d'abord une mention ci-dessus pour filtrer la liste si vous en avez plusieurs).</p>
+          <div id="ensParcoursResponsabiliteListe" class="w-full border rounded-lg px-3 py-2 bg-white max-h-40 overflow-y-auto text-sm">
+            <!-- rempli en JS : une case à cocher par parcours -->
+          </div>
+        </div>
+        <!--<p class="md:col-span-2 text-xs text-gray-500">La demande de responsabilite sera verifiee et validee par l'administration.</p>-->
+      </div>
+      
+
+      <!-- Sélection des ECs occupés -->
+      <div class="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3">
+        <div class="flex justify-between items-center">
+          <label class="block text-sm font-semibold text-gray-800">Éléments constitutifs (EC) occupés</label>
+          <span id="compteurEC" class="text-xs text-blue-900 font-medium">0 EC sélectionné</span>
+        </div>
+        <p class="text-xs text-gray-500">
+          Sélectionnez les matières (EC) que vous enseignez selon les parcours et niveaux :
+        </p>
+
+        <!-- Filtres rapides : Mention, Parcours, Niveau -->
+        <div class="grid grid-cols-3 gap-2">
+          <div>
+            <label class="block text-xs text-gray-500 mb-0.5">Mention</label>
+            <select id="filtreEnsMention" class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white">
+              <option value="">Toutes les mentions</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-0.5">Niveau</label>
+            <select id="filtreEnsNiveau" class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white">
+              <option value="">Tous les niveaux</option>
+              <option value="L1">L1</option>
+              <option value="L2">L2</option>
+              <option value="L3">L3</option>
+              <option value="M1">M1</option>
+              <option value="M2">M2</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs text-gray-500 mb-0.5">Parcours</label>
+            <select id="filtreEnsParcours" class="w-full border border-gray-300 rounded-lg px-2 py-1.5 text-xs bg-white">
+              <option value="">Tous les parcours</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="listeECSelection" class="max-h-56 overflow-y-auto space-y-1.5 bg-white border border-gray-200 rounded-lg p-3 text-xs">
+          <p class="text-gray-400 text-center py-2">Chargement du catalogue des EC...</p>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email professionnel</label>
+        <input required type="email" id="ensEmail" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Mot de passe (6 caractères minimum)</label>
+        <input required type="password" minlength="6" id="ensMotDePasse" class="w-full border border-gray-300 rounded-lg px-4 py-2">
+      </div>
+
+      <p class="text-xs text-gray-400">
+        Votre compte sera créé en attente de validation. L'administrateur validera votre inscription
+        avec les ECs choisis.
+      </p>
+      <button type="submit" id="btnInscrireEnseignant"
+        class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg transition">
+        Créer mon compte enseignant
+      </button>
+    </form>
+
+    <p class="text-sm text-gray-500 text-center mt-6 pt-4 border-t border-gray-100">
+      Déjà un compte ? <a href="index.html" class="text-blue-800 font-semibold hover:underline">Se connecter</a>
+    </p>
+  </div>
+
+  <section id="confirmationCard" class="confirmation-shell hidden w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+    <div class="relative bg-blue-900 px-8 pt-10 pb-14 text-white text-center">
+      <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(circle at 20% 20%, white 1px, transparent 1px); background-size: 22px 22px;"></div>
+      <div class="confirmation-ring relative mx-auto w-24 h-24 rounded-full bg-white/15 border border-white/30 flex items-center justify-center">
+        <div class="confirmation-check w-16 h-16 rounded-full bg-white text-blue-900 flex items-center justify-center text-4xl font-bold">✓</div>
+      </div>
+      <p class="relative mt-6 text-xs uppercase tracking-[.22em] text-white/70">Demande reçue</p>
+      <h1 class="relative mt-2 text-3xl font-bold">Votre compte est en attente</h1>
+      <p class="relative mt-3 max-w-lg mx-auto text-white/80 leading-relaxed">
+        Votre inscription a bien été transmise à l'administration universitaire.
+      </p>
+    </div>
+    <div class="px-6 sm:px-10 py-8">
+      <div class="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center">
+        <p class="text-xs uppercase tracking-wide text-gray-400">Adresse de suivi</p>
+        <p id="confirmationEmail" class="mt-1 font-semibold text-gray-800 break-all"></p>
+        <p class="mt-2 text-sm text-gray-500">Vous recevrez un email de confirmation dès que votre compte sera validé par un administrateur.</p>
+      </div>
+      <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-5 text-center">
+        <div class="confirmation-step">
+          <div class="mx-auto w-10 h-10 rounded-full bg-red-50 text-blue-900 flex items-center justify-center font-bold">1</div>
+          <h2 class="mt-3 text-sm font-semibold text-gray-800">Demande envoyée</h2>
+          <p class="mt-1 text-xs text-gray-500">Votre dossier est bien enregistré.</p>
+        </div>
+        <div class="confirmation-step">
+          <div class="mx-auto w-10 h-10 rounded-full bg-red-50 text-blue-900 flex items-center justify-center font-bold">2</div>
+          <h2 class="mt-3 text-sm font-semibold text-gray-800">Vérification admin</h2>
+          <p class="mt-1 text-xs text-gray-500">L'administration examine votre inscription.</p>
+        </div>
+        <div class="confirmation-step">
+          <div class="mx-auto w-10 h-10 rounded-full bg-red-50 text-blue-900 flex items-center justify-center font-bold">3</div>
+          <h2 class="mt-3 text-sm font-semibold text-gray-800">Email de confirmation</h2>
+          <p class="mt-1 text-xs text-gray-500">Vous serez informé dès l'activation.</p>
+        </div>
+      </div>
+      <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="index.html" class="text-center bg-blue-900 hover:bg-blue-800 text-white font-semibold px-6 py-3 rounded-xl transition">Retour à la connexion</a>
+        <button id="btnNouvelleInscription" type="button" class="text-center border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold px-6 py-3 rounded-xl transition">Nouvelle inscription</button>
+      </div>
+    </div>
+  </section>
+
+  <script src="js/api.js"></script>
+  <script>
+    // -------------------------------------------------------------
+    // 1. Bascule visuelle entre les deux formulaires (étudiant/enseignant)
+    // -------------------------------------------------------------
+    const ongletEtudiant = document.getElementById('ongletEtudiant');
+    const ongletEnseignant = document.getElementById('ongletEnseignant');
+    const formEtudiant = document.getElementById('formInscriptionEtudiant');
+    const formEnseignant = document.getElementById('formInscriptionEnseignant');
+    const inscriptionCard = document.getElementById('inscriptionCard');
+    const confirmationCard = document.getElementById('confirmationCard');
+    const confirmationEmail = document.getElementById('confirmationEmail');
+
+    function afficherConfirmation(email) {
+      confirmationEmail.textContent = email;
+      inscriptionCard.classList.add('hidden');
+      confirmationCard.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('btnNouvelleInscription').addEventListener('click', () => {
+      confirmationCard.classList.add('hidden');
+      inscriptionCard.classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    ongletEtudiant.addEventListener('click', () => {
+      ongletEtudiant.classList.add('bg-blue-900', 'text-white');
+      ongletEtudiant.classList.remove('text-gray-600');
+      ongletEnseignant.classList.remove('bg-blue-900', 'text-white');
+      ongletEnseignant.classList.add('text-gray-600');
+      formEtudiant.classList.remove('hidden');
+      formEnseignant.classList.add('hidden');
+    });
+
+    ongletEnseignant.addEventListener('click', () => {
+      ongletEnseignant.classList.add('bg-blue-900', 'text-white');
+      ongletEnseignant.classList.remove('text-gray-600');
+      ongletEtudiant.classList.remove('bg-blue-900', 'text-white');
+      ongletEtudiant.classList.add('text-gray-600');
+      formEnseignant.classList.remove('hidden');
+      formEtudiant.classList.add('hidden');
+    });
+
+    // -------------------------------------------------------------
+    // 2. Chargement de la liste des parcours & catalogue EC
+    // -------------------------------------------------------------
+    let catalogueEC = [];
+    let listeParcours = [];
+    const ecsSelectionnes = new Set();
+
+    async function chargerDonnees() {
+      try {
+        const [parcours, catalogue] = await Promise.all([
+          appelApi('/auth/parcours'),
+          appelApi('/auth/catalogue-ec')
+        ]);
+        listeParcours = parcours;
+        catalogueEC = catalogue;
+
+        // Remplir les mentions pour les filtres étudiant et enseignant
+        const mentionsUniques = [...new Set(listeParcours.map((p) => p.mention || '').filter(Boolean))].sort();
+        
+        const selectEtuMention = document.getElementById('etuMention');
+        selectEtuMention.innerHTML = '<option value="">-- Choisir votre mention --</option>' +
+          mentionsUniques.map((m) => `<option value="${m}">${m}</option>`).join('');
+
+        const filtreMention = document.getElementById('filtreEnsMention');
+        filtreMention.innerHTML = '<option value="">Toutes les mentions</option>' +
+          mentionsUniques.map((m) => `<option value="${m}">${m}</option>`).join('');
+
+        const filtreMentionResponsabilite = document.getElementById('ensFiltreMentionResponsabilite');
+        filtreMentionResponsabilite.innerHTML = '<option value="">Toutes les mentions</option>' +
+          mentionsUniques.map((m) => `<option value="${m}">${m}</option>`).join('');
+
+        mettreAJourParcoursEtudiant();
+        remplirParcoursResponsabilite();
+        mettreAJourSelectParcours();
+        afficherListeEC();
+      } catch (erreur) {
+        afficherMessage('messageErreur', 'Impossible de charger les données académiques.');
+      }
+    }
+
+    // On garde les parcours cochés dans un Set séparé (pas seulement dans
+    // le DOM) : si l'utilisateur change le filtre "mention", la liste
+    // affichée change, mais ses cases déjà cochées ne doivent pas se perdre.
+    const parcoursResponsabiliteSelectionnes = new Set();
+
+    function remplirParcoursResponsabilite() {
+      const mentionChoisie = document.getElementById('ensFiltreMentionResponsabilite').value.trim();
+      const conteneur = document.getElementById('ensParcoursResponsabiliteListe');
+
+      let parcoursFiltres = listeParcours;
+      if (mentionChoisie) {
+        parcoursFiltres = parcoursFiltres.filter((p) => (p.mention || '').trim().toLowerCase() === mentionChoisie.toLowerCase());
+      }
+
+      if (parcoursFiltres.length === 0) {
+        conteneur.innerHTML = '<p class="text-xs text-gray-400 italic px-1 py-1">Aucun parcours pour cette mention.</p>';
+        return;
+      }
+
+      conteneur.innerHTML = parcoursFiltres.map((p) => `
+        <label class="flex items-center gap-2 py-1">
+          <input type="checkbox" class="ens-parcours-resp" value="${p.id_parcours}" ${parcoursResponsabiliteSelectionnes.has(String(p.id_parcours)) ? 'checked' : ''}>
+          <span>${p.nom_parcours} - ${p.niveau} (${p.mention})</span>
+        </label>
+      `).join('');
+
+      conteneur.querySelectorAll('.ens-parcours-resp').forEach((cb) => {
+        cb.addEventListener('change', () => {
+          if (cb.checked) parcoursResponsabiliteSelectionnes.add(cb.value);
+          else parcoursResponsabiliteSelectionnes.delete(cb.value);
+        });
+      });
+    }
+
+    document.getElementById('ensFiltreMentionResponsabilite').addEventListener('change', remplirParcoursResponsabilite);
+
+    function mettreAJourParcoursEtudiant() {
+      const mention = document.getElementById('etuMention').value.trim();
+      const niveau = document.getElementById('etuNiveau').value.trim();
+      const selectEtu = document.getElementById('etuParcours');
+
+      let parcoursFiltres = listeParcours;
+      if (mention) {
+        parcoursFiltres = parcoursFiltres.filter((p) => (p.mention || '').trim().toLowerCase() === mention.toLowerCase());
+      }
+      if (niveau) {
+        parcoursFiltres = parcoursFiltres.filter((p) => (p.niveau || '').trim().toUpperCase() === niveau.toUpperCase());
+      }
+
+      if (parcoursFiltres.length === 0) {
+        selectEtu.innerHTML = '<option value="">Aucun parcours pour cette mention/niveau</option>';
+        return;
+      }
+
+      selectEtu.innerHTML = '<option value="">-- Choisir votre parcours --</option>' +
+        parcoursFiltres.map((p) => `<option value="${p.id_parcours}">${p.nom_parcours} - ${p.niveau} (${p.mention})</option>`).join('');
+
+      if (parcoursFiltres.length === 1) {
+        selectEtu.value = parcoursFiltres[0].id_parcours;
+      }
+    }
+
+    document.getElementById('etuMention').addEventListener('change', mettreAJourParcoursEtudiant);
+    document.getElementById('etuNiveau').addEventListener('change', mettreAJourParcoursEtudiant);
+
+    function initialiserAnneesUniversitaires() {
+      const select = document.getElementById('etuAnneeUniversitaire');
+      const anneeActuelle = new Date().getFullYear();
+      const premiereAnnee = 2024;
+      const derniereAnnee = Math.max(anneeActuelle + 2, 2030);
+      const options = [];
+
+      for (let annee = premiereAnnee; annee <= derniereAnnee; annee += 1) {
+        options.push(`<option value="${annee}-${annee + 1}">${annee}-${annee + 1}</option>`);
+      }
+      select.insertAdjacentHTML('beforeend', options.join(''));
+
+      const mois = new Date().getMonth() + 1;
+      const debutAnneeCourante = mois >= 9 ? anneeActuelle : anneeActuelle - 1;
+      select.value = `${debutAnneeCourante}-${debutAnneeCourante + 1}`;
+    }
+
+    function mettreAJourSelectParcours() {
+      const mentionChoisie = document.getElementById('filtreEnsMention').value.trim();
+      const niveauChoisi = document.getElementById('filtreEnsNiveau').value.trim();
+      const filtreParcours = document.getElementById('filtreEnsParcours');
+
+      let parcoursFiltres = listeParcours;
+      if (mentionChoisie) {
+        parcoursFiltres = parcoursFiltres.filter((p) => (p.mention || '').trim().toLowerCase() === mentionChoisie.toLowerCase());
+      }
+      if (niveauChoisi) {
+        parcoursFiltres = parcoursFiltres.filter((p) => (p.niveau || '').trim().toUpperCase() === niveauChoisi.toUpperCase());
+      }
+
+      const valActuelle = filtreParcours.value;
+      filtreParcours.innerHTML = '<option value="">Tous les parcours</option>' +
+        parcoursFiltres.map((p) => `<option value="${p.id_parcours}">${p.nom_parcours} (${p.niveau})</option>`).join('');
+
+      if (parcoursFiltres.some((p) => String(p.id_parcours) === String(valActuelle))) {
+        filtreParcours.value = valActuelle;
+      } else {
+        filtreParcours.value = '';
+      }
+    }
+
+    function afficherListeEC() {
+      const conteneur = document.getElementById('listeECSelection');
+      const filtreMention = document.getElementById('filtreEnsMention').value.trim();
+      const filtreParcours = document.getElementById('filtreEnsParcours').value;
+      const filtreNiveau = document.getElementById('filtreEnsNiveau').value.trim();
+
+      let filtres = catalogueEC;
+      if (filtreMention) {
+        filtres = filtres.filter((ec) => (ec.mention || '').trim().toLowerCase() === filtreMention.toLowerCase());
+      }
+      if (filtreParcours) {
+        filtres = filtres.filter((ec) => String(ec.id_parcours) === String(filtreParcours));
+      }
+      if (filtreNiveau) {
+        filtres = filtres.filter((ec) => (ec.niveau || '').trim().toUpperCase() === filtreNiveau.toUpperCase());
+      }
+
+      // Déduplication par id_EC pour l'affichage
+      const mapEC = new Map();
+      filtres.forEach((item) => {
+        if (!mapEC.has(item.id_EC)) mapEC.set(item.id_EC, item);
+      });
+      const ecUniques = Array.from(mapEC.values());
+
+      if (ecUniques.length === 0) {
+        conteneur.innerHTML = '<p class="text-gray-400 text-center py-2">Aucun EC trouvé pour ces critères (Mention / Parcours / Niveau).</p>';
+        return;
+      }
+
+      conteneur.innerHTML = ecUniques.map((ec) => `
+        <label class="flex items-start gap-2 p-2 hover:bg-blue-50 rounded cursor-pointer transition border-b border-gray-100 last:border-b-0">
+          <input type="checkbox" value="${ec.id_EC}" class="chk-ec mt-1 rounded text-blue-900 focus:ring-blue-800"
+            ${ecsSelectionnes.has(String(ec.id_EC)) ? 'checked' : ''}>
+          <div class="flex-1 leading-tight">
+            <div class="flex items-center justify-between">
+              <span class="font-semibold text-gray-800 text-xs">${ec.nom_EC}</span>
+              <span class="text-[10px] bg-blue-100 text-blue-800 font-medium px-1.5 py-0.5 rounded">${ec.mention || 'Général'}</span>
+            </div>
+            <span class="text-gray-500 block text-[11px] mt-0.5">
+              ${ec.nom_UE} | <strong>${ec.niveau}</strong> (${ec.semestre}) - ${ec.nom_parcours} (${ec.credit} crédits)
+            </span>
+          </div>
+        </label>
+      `).join('');
+
+      conteneur.querySelectorAll('.chk-ec').forEach((chk) => {
+        chk.addEventListener('change', () => {
+          if (chk.checked) ecsSelectionnes.add(chk.value);
+          else ecsSelectionnes.delete(chk.value);
+          mettreAJourCompteur();
+        });
+      });
+
+      mettreAJourCompteur();
+    }
+
+    function mettreAJourCompteur() {
+      const el = document.getElementById('compteurEC');
+      const n = ecsSelectionnes.size;
+      el.textContent = `${n} EC sélectionné${n > 1 ? 's' : ''}`;
+    }
+
+    document.getElementById('filtreEnsMention').addEventListener('change', () => {
+      mettreAJourSelectParcours();
+      afficherListeEC();
+    });
+    document.getElementById('filtreEnsParcours').addEventListener('change', afficherListeEC);
+    document.getElementById('filtreEnsNiveau').addEventListener('change', () => {
+      mettreAJourSelectParcours();
+      afficherListeEC();
+    });
+
+    initialiserAnneesUniversitaires();
+    // Pas de validation HTML native "required" possible sur une liste de
+    // cases à cocher (contrairement à un <select>) : la vérification se
+    // fait donc manuellement à la soumission du formulaire, plus bas.
+
+    // -------------------------------------------------------------
+    // 3. Soumission du formulaire ÉTUDIANT
+    // -------------------------------------------------------------
+    formEtudiant.addEventListener('submit', async (evenement) => {
+      evenement.preventDefault();
+      const bouton = document.getElementById('btnInscrireEtudiant');
+      bouton.disabled = true;
+      bouton.textContent = 'Envoi de la demande...';
+
+      try {
+        const reponse = await appelApi('/auth/inscription-etudiant', 'POST', {
+          nom: document.getElementById('etuNom').value.trim(),
+          prenom: document.getElementById('etuPrenom').value.trim(),
+          date_naissance: document.getElementById('etuDateNaissance').value || null,
+          lieu_naissance: document.getElementById('etuLieuNaissance').value.trim() || null,
+          sexe: document.getElementById('etuSexe').value,
+          cin: document.getElementById('etuCin').value.trim() || null,
+          tel_etudiant: document.getElementById('etuTel').value.trim() || null,
+          email: document.getElementById('etuEmail').value.trim(),
+          mot_de_passe: document.getElementById('etuMotDePasse').value,
+          id_parcours: parseInt(document.getElementById('etuParcours').value, 10),
+          annee_universitaire: document.getElementById('etuAnneeUniversitaire').value
+        });
+
+        afficherConfirmation(document.getElementById('etuEmail').value.trim());
+        formEtudiant.reset();
+      } catch (erreur) {
+        afficherMessage('messageErreur', erreur.message);
+      } finally {
+        bouton.disabled = false;
+        bouton.textContent = 'Créer mon compte étudiant';
+      }
+    });
+
+    // -------------------------------------------------------------
+    // 4. Soumission du formulaire ENSEIGNANT
+    // -------------------------------------------------------------
+    formEnseignant.addEventListener('submit', async (evenement) => {
+      evenement.preventDefault();
+      const bouton = document.getElementById('btnInscrireEnseignant');
+      bouton.disabled = true;
+      bouton.textContent = 'Envoi de la demande...';
+
+      try {
+        const roleResponsabilite = document.getElementById('ensRoleResponsabilite').value || null;
+        const parcoursResponsabilite = Array.from(parcoursResponsabiliteSelectionnes);
+
+        if (roleResponsabilite && parcoursResponsabilite.length === 0) {
+          throw new Error('Coche au moins un parcours concerné par ta demande de responsabilité (ou choisis "Aucune").');
+        }
+
+        const reponse = await appelApi('/auth/inscription-enseignant', 'POST', {
+          nom: document.getElementById('ensNom').value.trim(),
+          prenom: document.getElementById('ensPrenom').value.trim(),
+          sexe: document.getElementById('ensSexe').value,
+          matricule: document.getElementById('ensMatricule').value.trim(),
+          date_naissance: document.getElementById('ensDateNaissance').value || null,
+          cin: document.getElementById('ensCin').value.trim() || null,
+          tel_enseignant: document.getElementById('ensTel').value.trim() || null,
+          diplome: document.getElementById('ensDiplome').value.trim() || null,
+          grade: document.getElementById('ensGrade').value.trim() || null,
+          specialite: document.getElementById('ensSpecialite').value.trim() || null,
+          mention_etabisement_attache: document.getElementById('ensMentionEtablissement').value.trim() || null,
+          role_responsabilite: roleResponsabilite,
+          id_parcours_responsabilite: parcoursResponsabilite,
+          email: document.getElementById('ensEmail').value.trim(),
+          mot_de_passe: document.getElementById('ensMotDePasse').value,
+          id_ecs: Array.from(ecsSelectionnes)
+        });
+
+        afficherConfirmation(document.getElementById('ensEmail').value.trim());
+        formEnseignant.reset();
+        ecsSelectionnes.clear();
+        parcoursResponsabiliteSelectionnes.clear();
+        remplirParcoursResponsabilite();
+        mettreAJourCompteur();
+        afficherListeEC();
+      } catch (erreur) {
+        afficherMessage('messageErreur', erreur.message);
+      } finally {
+        bouton.disabled = false;
+        bouton.textContent = 'Créer mon compte enseignant';
+      }
+    });
+
+    chargerDonnees();
+  </script>
+</body>
+</html>

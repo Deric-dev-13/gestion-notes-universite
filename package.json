@@ -1,0 +1,19 @@
+{
+  "name": "gestion-notes-universite",
+  "version": "1.0.0",
+  "description": "Application web complète (Node.js/Express/MySQL + HTML/CSS/JS vanilla) pour la gestion des notes de la mention **Génie Mathématiques et Informatique (GMI)**, de la Licence 1 au Master 2. Trois espaces : **Étudiant** (lecture seule, historique complet), **Enseignant** (saisie des notes, y compris pour les années passées et les rattrapages de dette), et **Administrateur** (gestion globale, catalogue, clôture d'année).",
+  "main": "index.js",
+  "scripts": {
+  "dev": ".\\node_modules\\.bin\\tailwindcss -i .\\frontend\\css\\style.css -o .\\frontend\\css\\output.css --watch"
+},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "tailwindcss": "^4.3.3"
+  },
+  "dependencies": {
+    "@tailwindcss/cli": "^4.3.3"
+  }
+}

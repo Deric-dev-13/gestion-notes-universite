@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mot de passe oublié - Gestion de Notes Universitaire</title>
+<script>
+  tailwind = { config: { theme: { extend: { colors: {
+    blue: { 50: '#822522', 100: '#822522', 200: '#822522', 300: '#822522', 400: '#822522', 500: '#822522', 600: '#822522', 700: '#822522', 800: '#822522', 900: '#822522', 950: '#822522' },
+    white: '#B0ACA3'
+  } } } } };
+</script>
+<!--<script src="https://cdn.tailwindcss.com"></script>-->
+<link rel="stylesheet" href="css/output.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen flex items-center justify-center px-4 py-8">
+
+  <div class="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+    <div class="text-center mb-6">
+      <div class="mx-auto w-14 h-14 rounded-full bg-blue-900 flex items-center justify-center text-white text-2xl font-bold">
+        <img src="photos/logo_note.jpg"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+             style="width:50px; height:50px; border-radius:50%;"
+             alt="Logo Université d'Antsiranana">
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800 mt-4">Mot de passe oublié</h1>
+      <p class="text-gray-500 text-sm mt-1">
+        Indiquez votre adresse email et le mot de passe que vous souhaitez. Un email de confirmation vous sera envoyé automatiquement : cliquez sur le lien qu'il contient pour l'activer.
+      </p>
+    </div>
+
+    <form id="formReset" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Votre rôle</label>
+        <select id="role" required class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-800">
+          <option value="etudiant">Étudiant</option>
+          <option value="enseignant">Enseignant</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Adresse Gmail ou email du compte</label>
+        <input type="email" id="email" required placeholder="exemple@gmail.com"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-800">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nouveau mot de passe souhaité (min. 6 caractères)</label>
+        <input type="password" id="motDePasseSouhaite" minlength="6" required
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-800">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Confirmer le nouveau mot de passe</label>
+        <input type="password" id="motDePasseConfirm" minlength="6" required
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-800">
+      </div>
+
+      <div id="messageErreur" class="hidden"></div>
+      <div id="messageSucces" class="hidden"></div>
+
+      <button type="submit" id="btnEnvoyer"
+        class="w-full bg-blue-900 hover:bg-blue-800 text-white font-semibold py-2.5 rounded-lg transition">
+        Envoyer le lien de confirmation
+      </button>
+    </form>
+
+    <div class="text-center mt-6 pt-4 border-t border-gray-100">
+      <p class="text-sm text-gray-500">
+        Vous vous souvenez de votre mot de passe ?
+        <a href="index.html" class="text-blue-800 font-semibold hover:underline">Retour à la connexion</a>
+      </p>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    const formulaire = document.getElementById('formReset');
+    const boutonEnvoyer = document.getElementById('btnEnvoyer');
+
+    formulaire.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const role = document.getElementById('role').value;
+      const email = document.getElementById('email').value.trim();
+      const motDePasseSouhaite = document.getElementById('motDePasseSouhaite').value;
+      const motDePasseConfirm = document.getElementById('motDePasseConfirm').value;
+
+      if (motDePasseSouhaite !== motDePasseConfirm) {
+        afficherMessage('messageErreur', 'Les deux mots de passe ne correspondent pas.');
+        return;
+      }
+
+      boutonEnvoyer.disabled = true;
+      boutonEnvoyer.textContent = 'Envoi en cours...';
+
+      try {
+        const reponse = await appelApi('/auth/demande-reinitialisation', 'POST', {
+          role,
+          email,
+          mot_de_passe_souhaite: motDePasseSouhaite
+        });
+
+        afficherMessage('messageSucces', reponse.message, 'succes');
+        formulaire.reset();
+      } catch (erreur) {
+        afficherMessage('messageErreur', erreur.message);
+      } finally {
+        boutonEnvoyer.disabled = false;
+        boutonEnvoyer.textContent = "Envoyer le lien de confirmation";
+      }
+    });
+  </script>
+</body>
+</html>

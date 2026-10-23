@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace Enseignant - Gestion de Notes</title>
+<script>
+  tailwind = { config: { theme: { extend: { colors: {
+    blue: { 50: '#822522', 100: '#822522', 200: '#822522', 300: '#822522', 400: '#822522', 500: '#822522', 600: '#822522', 700: '#822522', 800: '#822522', 900: '#822522', 950: '#822522' },
+    white: '#B0ACA3'
+  } } } } };
+</script>
+<!--<script src="https://cdn.tailwindcss.com"></script>-->
+<link rel="stylesheet" href="../css/output.css">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="min-h-screen">
+
+  <header class="app-header bg-blue-900 text-white px-6 py-4 flex justify-between items-center shadow">
+    <div class="flex items-center gap-3">
+      <button id="btnMenuMobileEnseignant" type="button" aria-label="Ouvrir le menu" aria-expanded="false" class="md:hidden flex flex-col gap-1.5 p-2 rounded-lg bg-white/10 shadow border border-white/20 text-white">
+        <span class="block w-6 h-0.5 bg-current rounded"></span>
+        <span class="block w-6 h-0.5 bg-current rounded"></span>
+        <span class="block w-6 h-0.5 bg-current rounded"></span>
+      </button>
+      <div>
+        <h1 class="text-lg font-bold"></h1>
+        <span id="nomEnseignant" class="text-sm"></span>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 md:flex">
+      <span id="notification" class="text-sm inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/10 border border-white/20" title="Notifications">
+        🔔
+      </span>
+      <button id="btnDeconnexion" class="hidden md:inline-flex bg-blue-800 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm">Déconnexion</button>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8 space-y-6">
+
+    <section>
+      <div class="flex items-end justify-between gap-3 mb-4">
+        <div>
+          <p class="text-xs uppercase tracking-wide text-gray-500">Vue d'ensemble</p>
+          <h2 class="text-xl font-semibold text-gray-800">Mon activité pédagogique</h2>
+          <p id="anneeStatistiquesEnseignant" class="text-xs text-gray-500 mt-1">Année courante</p>
+        </div>
+        <button id="btnRafraichirStatistiquesEnseignant" class="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-sm shadow-sm">Actualiser</button>
+      </div>
+      <div id="cartesStatistiquesEnseignant" class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="text-sm text-gray-400">Chargement des statistiques...</div>
+      </div>
+    </section>
+
+    <section class="bg-white rounded-xl shadow p-6" id="carteProfilEnseignant">
+      <h2 class="text-lg font-semibold text-gray-800 mb-3">Mon profil</h2>
+      <div id="contenuProfilEnseignant" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 text-sm text-gray-600">
+        <span class="text-gray-400 text-xs">Chargement...</span>
+      </div>
+    </section>
+
+    <!-- Sélection du contexte de travail -->
+    <section class="bg-white rounded-xl shadow p-6" id="carteContexteEnseignant">
+      <div class="mb-4">
+        <h2 class="text-lg font-semibold text-gray-800">Sélectionner un contexte de travail</h2>
+        <p class="text-xs text-gray-500 mt-0.5">Filtrez vos matières (EC) par mention, parcours et niveau pour faciliter la saisie des notes :</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">1. Mention</label>
+          <select id="selectMention" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">2. Parcours</label>
+          <select id="selectParcours" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">3. Niveau</label>
+          <select id="selectNiveau" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">4. Élément constitutif (EC)</label>
+          <select id="selectEC" class="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm font-medium text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-700 mb-1">5. Année universitaire</label>
+          <select id="selectAnneeEnseignant" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"></select>
+        </div>
+      </div>
+      <p class="text-xs text-gray-400 mt-3">
+        Vous pouvez choisir une année universitaire passée pour corriger ou
+        compléter une note, y compris pour un rattrapage de dette (voir
+        l'onglet "Étudiants en dette" plus bas).
+      </p>
+    </section>
+
+    <div id="messageErreur" class="hidden"></div>
+    <div id="messageSucces" class="hidden"></div>
+    <div id="messageChoixEC" class="hidden text-orange-700 bg-orange-50 border border-orange-200 rounded-lg px-4 py-2 text-sm">
+      Sélectionnez d'abord un EC dans « Contexte de travail » pour afficher cette liste.
+    </div>
+
+
+    <!-- Onglets Profil / Étudiants / Dettes -->
+    <nav class="relative" id="navEnseignant">
+      <div id="ongletsEnseignant" class="flex gap-2">
+        <a href="#carteProfilEnseignant"><button data-onglet="profil" class="onglet-ens-btn px-4 py-2 rounded-lg bg-white text-gray-700 text-sm shadow">Profil</button></a>
+        <a href="#carteContexteEnseignant"><button data-onglet="etudiants" class="onglet-ens-btn px-4 py-2 rounded-lg bg-blue-900 text-white text-sm">Contexte de travail</button></a>
+        <a href="#carteContexteEnseignant"><button data-onglet="dettes" class="onglet-ens-btn px-4 py-2 rounded-lg bg-white text-gray-700 text-sm shadow">Étudiants en dette</button></a>
+      </div>
+    </nav>
+
+    <!-- Liste des étudiants + saisie rapide des notes -->
+    <section id="carteEtudiants" class="bg-white rounded-xl shadow p-6 hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold text-gray-800">Étudiants du contexte sélectionné</h2>
+        <button id="btnAjouterNote" class="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm">
+          + Saisir une note
+        </button>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="tableau-notes w-full text-sm" id="tableauEtudiants">
+          <thead>
+            <tr>
+              <th class="text-left px-4 py-2">Numéro</th>
+              <th class="text-left px-4 py-2">Nom</th>
+              <th class="text-left px-4 py-2">Prénom</th>
+              <th class="text-left px-4 py-2">Notes saisies</th>
+              <th class="text-left px-4 py-2">Action</th>
+            </tr>
+          </thead>
+          <tbody id="corpsTableauEtudiants"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Liste des étudiants en dette sur cet EC -->
+    <section id="carteDettes" class="bg-white rounded-xl shadow p-6 hidden">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg font-semibold text-gray-800">Étudiants en dette sur cet EC</h2>
+        <button id="btnAjouterNoteDette" class="bg-blue-900 hover:bg-blue-800 text-white px-4 py-2 rounded-lg text-sm">
+          + Saisir une note de rattrapage de dette
+        </button>
+      </div>
+      <p class="text-xs text-gray-400 mb-4">
+        Ces étudiants ne sont pas forcément inscrits cette année dans un
+        parcours qui contient cet EC : c'est justement pour cela qu'ils sont
+        en dette. Une note de rattrapage &ge; 10 solde automatiquement la dette.
+      </p>
+      <table class="tableau-notes w-full text-sm">
+        <thead><tr>
+          <th class="text-left px-4 py-2">Numéro</th>
+          <th class="text-left px-4 py-2">Nom</th>
+          <th class="text-left px-4 py-2">Dette ouverte en</th>
+          <th class="text-left px-4 py-2">Action</th>
+        </tr></thead>
+        <tbody id="corpsTableauDettes"></tbody>
+      </table>
+    </section>
+
+  </main>
+
+  <!-- Modale de saisie/modification de note -->
+  <div id="modaleNote" class="fixed inset-0 bg-black/80 hidden items-center justify-center px-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
+      <h3 id="titreModale" class="text-lg font-semibold text-gray-800 mb-4">Saisir une note</h3>
+      <form id="formNote" class="space-y-4">
+        <input type="hidden" id="idNote">
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Étudiant</label>
+          <select id="modaleEtudiant" class="w-full border border-gray-300 rounded-lg px-3 py-2" required></select>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Année universitaire de cette note</label>
+          <input type="text" id="modaleAnnee" placeholder="ex: 2025-2026" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Note (sur 20)</label>
+          <input type="number" step="0.25" min="0" max="20" id="modaleNoteValeur" required
+            class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Type d'évaluation</label>
+          <select id="modaleType" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
+            <option value="Session Normale">Examen - Session Normale</option>
+            <option value="Rattrapage">Examen - Rattrapage</option>
+           <!-- <option value="TD"></option>
+            <option value="Projet"></option>
+            <option value="TP"></option>-->
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm text-gray-600 mb-1">Date de l'évaluation</label>
+          <input type="date" id="modaleDate" required class="w-full border border-gray-300 rounded-lg px-3 py-2">
+        </div>
+        <div class="flex justify-end gap-3 pt-2">
+          <button type="button" id="btnFermerModale" class="bg-gray-100 hover:bg-gray-800 text-red-100 px-4 py-2 rounded-lg">Annuler</button>
+          <button type="submit" class="bg-blue-900 hover:bg-blue-800 text-white px-5 py-2 rounded-lg">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

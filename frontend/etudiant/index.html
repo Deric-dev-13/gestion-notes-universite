@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Espace Étudiant - Gestion de Notes</title>
+<!--<script src="https://cdn.tailwindcss.com"></script>-->
+<link rel="stylesheet" href="../css/output.css">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body class="min-h-screen">
+
+  <header class="app-header bg-blue-900 text-white px-6 py-4 flex justify-between items-center shadow">
+    <div class="flex items-center gap-3">
+      <button id="btnMenuMobileEtudiant" type="button" aria-label="Ouvrir le menu" aria-expanded="false" class="md:hidden flex flex-col gap-1.5 p-2 rounded-lg bg-white/10 shadow border border-white/20 text-white">
+        <span class="block w-6 h-0.5 bg-current rounded"></span>
+        <span class="block w-6 h-0.5 bg-current rounded"></span>
+        <span class="block w-6 h-0.5 bg-current rounded"></span>
+      </button>
+      <div class="flex">
+        <h1 class="text-lg font-bold"></h1>
+        <span id="nomEtudiant" class="text-sm"></span>
+      </div>
+    </div>
+    <div class="flex items-center gap-4 md:flex">
+      <span id="notification" class="text-sm inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/10 border border-white/20" title="Notifications">
+        🔔
+      </span>
+      <button id="btnDeconnexion" class="hidden md:inline-flex bg-blue-800 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm">Déconnexion</button>
+    </div>
+  </header>
+
+  <main class="releve-main max-w-5xl mx-auto px-4 py-8 space-y-6">
+
+    <!-- Carte profil -->
+    <section class="bg-white rounded-xl shadow p-6" id="carteProfil">
+      <h2 class="text-lg font-semibold text-gray-800 mb-3">Mon profil <p class="text-blue-200 text-sm" id="infoParcours">Chargement...</p></h2>
+      
+      <div id="contenuProfil" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 text-sm text-gray-600"></div>
+    </section>
+
+     <!-- Catalogue des statuts académiques -->
+    <section class="bg-white rounded-xl shadow p-6" id="carteStatuts">
+      <h2 class="text-lg font-semibold text-gray-800 mb-1">Mon statut académique</h2>
+      <p class="text-sm text-gray-500 mb-4" id="texteStatutCourant">Chargement...</p>
+      <div id="catalogueStatuts" class="catalogue-statuts"></div>
+      <h3 class="text-sm font-semibold text-gray-700 mt-5 mb-2">Mon parcours année par année</h3>
+      <div class="overflow-x-auto">
+        <table class="tableau-notes w-full text-sm">
+          <thead><tr>
+            <th class="text-left px-3 py-2">Année</th>
+            <th class="text-left px-3 py-2">Niveau</th>
+            <th class="text-left px-3 py-2">Parcours</th>
+            <th class="text-left px-3 py-2">Statut</th>
+          </tr></thead>
+          <tbody id="corpsHistoriqueStatuts"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Barre de contrôle : année + session + onglets + PDF -->
+   <section id="page-notes" class="bg-white rounded-xl shadow p-4 items-center justify-between gap-4">
+       <div class="flex flex-wrap items-center gap-4">
+         <div>
+           <label class="block text-xs text-gray-500 mb-1">Année universitaire</label>
+           <select id="selectAnnee" class="border border-gray-300 rounded-lg px-3 py-1.5 text-sm"></select>
+         </div>
+         <div class="flex bg-gray-100 rounded-lg p-1" id="ongletsSession">
+           <button data-session="normale" class="btn-session px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-900 text-white">Session Normale (1re session)</button>
+           <button data-session="rattrapage" class="btn-session px-3 py-1.5 rounded-lg text-sm font-medium text-gray-600">Rattrapage (2e session)</button>
+         </div>
+       </div>
+    
+
+       <div id="messageErreur" class="hidden"></div>
+
+     <!-- Page Notes -->
+     <div id="page-notes">
+       <div id="conteneurSemestres" class="space-y-6">
+         <p class="text-gray-500">Chargement des notes...</p>
+       </div>
+       <section id="carteDecision" class="hidden bg-white rounded-xl shadow p-6 text-center mt-6"></section>
+     </div>
+   </section>
+   
+    <!-- Page Dettes -->
+     <div id="page-dettes" class="hidden">
+       <section class="bg-white rounded-xl shadow p-6 overflow-x-auto">
+         <h2 class="font-semibold text-gray-800 mb-4">Éléments constitutifs en dette</h2>
+         <p class="text-sm text-gray-500 mb-4">
+          Un EC apparaît ici lorsqu'un semestre n'a pas été validé, même après
+          rattrapage, mais que vous avez tout de même été admis(e) au niveau
+          supérieur grâce à la validation de l'autre semestre. Vous devez
+          repasser ces EC pour solder votre dette.
+         </p>
+         <table class="tableau-notes w-full text-sm">
+           <thead><tr>
+             <th class="text-left px-3 py-2">Élément constitutif</th>
+             <th class="text-left px-3 py-2">UE</th>
+             <th class="text-left px-3 py-2">Année d'origine</th>
+             <th class="text-left px-3 py-2">Statut</th>
+             <th class="text-left px-3 py-2">Soldée en</th>
+           </tr></thead>
+           <tbody id="corpsTableauDettes"></tbody>
+         </table>
+       </section>
+     </div>
+    <!-- Onglets Profil / Notes / Dettes -->
+    <nav class="relative">
+      <div id="ongletsEtudiant" class="flex gap-2">
+        <button data-page="profil" class="page-btn px-4 py-2 rounded-lg bg-white text-gray-700 text-sm shadow">Profil</button>
+        <button data-page="status" class="page-btn px-4 py-2 rounded-lg bg-white text-gray-700 text-sm shadow">status</button>
+        <button data-page="notes" class="page-btn px-4 py-2 rounded-lg bg-blue-900 text-white text-sm">Mes notes</button>
+        <button data-page="dettes" class="page-btn px-4 py-2 rounded-lg bg-white text-gray-700 text-sm shadow">Mes dettes</button>
+      </div>
+    </nav>
+
+
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
