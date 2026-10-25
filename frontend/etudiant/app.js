@@ -10,7 +10,7 @@
 
 protegerPage('etudiant');
 
-const elNom = document.getElementById('nomEtudiant');
+//const elNom = document.getElementById('nomEtudiant');
 const elInfoParcours = document.getElementById('infoParcours');
 const elContenuProfil = document.getElementById('contenuProfil');
 const elConteneurSemestres = document.getElementById('conteneurSemestres');
@@ -18,7 +18,7 @@ const elCarteDecision = document.getElementById('carteDecision');
 const elSelectAnnee = document.getElementById('selectAnnee');
 const elCorpsDettes = document.getElementById('corpsTableauDettes');
 
-document.getElementById('btnDeconnexion').addEventListener('click', deconnexion);
+//document.getElementById('btnDeconnexion').addEventListener('click', deconnexion);
 
 const notificationEtudiant = document.getElementById('notification');
 if (notificationEtudiant) {
@@ -189,7 +189,7 @@ function extraireCodeMention(mention) {
   if (m.includes('MECAN') || m.includes('MÉCAN') || m === 'GM') return 'GM';
   if (m.includes('INDUSTRIEL') || m === 'GI') return 'GI';
   if (m.includes('TELECOM') || m.includes('TÉLÉCOM') || m === 'GTR' || m === 'TC') return 'GTR';
-  if (m.includes('INFO') || m === 'INF') return 'INF';
+  if (m.includes('INF') || m === 'INF') return 'INF';
   if (m.includes('MATH')) return 'MATH';
   if (m.includes('PHYSIQUE')) return 'PHYS';
   if (m.includes('CHIMIE')) return 'CHIM';
@@ -212,7 +212,8 @@ function genererMatricule(numero, mention, annee) {
 // Chargement initial
 // --------------------------------------------------------------
 async function initialiser() {
-  elNom.textContent = `${localStorage.getItem('prenom')} ${localStorage.getItem('nom')}`;
+  //elNom.textContent = `${localStorage.getItem('')} ${localStorage.getItem('')}`;
+  //elNom.textContent = `${localStorage.getItem('prenom')} ${localStorage.getItem('nom')}`;
   await chargerProfil();
   await chargerAnnees();
   await chargerDettes();
@@ -527,10 +528,6 @@ async function chargerDettes() {
     afficherMessage('messageErreur', erreur.message);
   }
 }
-
-// --------------------------------------------------------------
-// Téléchargement PDF & Impression
-// --------------------------------------------------------------
 
 initialiser();
 

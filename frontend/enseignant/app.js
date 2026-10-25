@@ -13,9 +13,9 @@
 
 protegerPage('enseignant');
 
-document.getElementById('nomEnseignant').textContent =
-  `${localStorage.getItem('prenom')} ${localStorage.getItem('nom')}`;
-document.getElementById('btnDeconnexion').addEventListener('click', deconnexion);
+//document.getElementById('nomEnseignant').textContent =
+  //`${localStorage.getItem('prenom')} ${localStorage.getItem('nom')}`;
+//document.getElementById('btnDeconnexion').addEventListener('click', deconnexion);
 
 const notificationEnseignant = document.getElementById('notification');
 if (notificationEnseignant) {
@@ -32,6 +32,23 @@ if (notificationEnseignant) {
   panneauNotifications.className = 'notification-panel hidden';
   document.body.appendChild(panneauNotifications);
 
+  function echapperHtml(texte) {
+    return String(texte).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // Détail des étudiants en dette : nom, parcours, niveau et EC concernés
+  function rendreDetailsNotification(details) {
+    if (!Array.isArray(details) || details.length === 0) return '';
+    return '<ul style="margin:6px 0 0 0;padding-left:16px;list-style:disc;">' + details.map((d) =>
+      `<li style="margin-bottom:6px;"><strong>${echapperHtml(d.etudiant)}</strong><br>` +
+      `Parcours : ${echapperHtml(d.parcours)} — Niveau : ${echapperHtml(d.niveau)}<br>` +
+      'EC en dette :<ul style="margin:2px 0 0 0;padding-left:14px;list-style:circle;">' +
+      d.ecs.map((ec) => `<li>${echapperHtml(ec.nom)} <em>(dette de ${echapperHtml(ec.annee)}, niveau ${echapperHtml(ec.niveau)})</em></li>`).join('') +
+      '</ul></li>'
+      //`EC en dette : ${d.ecs.map(echapperHtml).join(', ')}</li>`
+    ).join('') + '</ul>';
+  }
+
   async function chargerNotificationsEnseignant() {
     try {
       const items = await appelApi('/enseignant/notifications');
@@ -44,7 +61,8 @@ if (notificationEnseignant) {
         <div class="notification-header">Notifications</div>
         <ul class="notification-list">
           ${notifications.length > 0
-            ? notifications.map((item) => `<li>${item.texte || 'Notification'}</li>`).join('')
+            ? notifications.map((item) => `<li>${echapperHtml(item.texte || 'Notification')}${rendreDetailsNotification(item.details)}</li>`).join('')
+            //? notifications.map((item) => `<li>${item.texte || 'Notification'}</li>`).join('')
             : '<li>Aucune notification active pour votre espace.</li>'}
         </ul>
       `;
@@ -488,6 +506,7 @@ selectMention.addEventListener('change', () => {
 selectParcours.addEventListener('change', () => {
   selectNiveau.value = '';
   actualiserFiltresEtEC();
+   if (ecSelectionneCourant && !carteEtudiants.classList.contains('hidden')) chargerEtudiantsEtNotes();
 });
 
 selectNiveau.addEventListener('change', () => {
@@ -540,7 +559,11 @@ function masquerCartes() {
 async function chargerEtudiantsEtNotes() {
   try {
     const annee = selectAnnee.value;
-    etudiantsCourants = await appelApi(`/enseignant/ec/${ecSelectionneCourant.id_EC}/etudiants?annee=${encodeURIComponent(annee)}`);
+    // Si un parcours est choisi, on n'affiche que les étudiants de CE parcours
+    const idParcours = selectParcours.value;
+    const filtreParcours = idParcours ? `&id_parcours=${encodeURIComponent(idParcours)}` : '';
+    etudiantsCourants = await appelApi(`/enseignant/ec/${ecSelectionneCourant.id_EC}/etudiants?annee=${encodeURIComponent(annee)}${filtreParcours}`);
+    //etudiantsCourants = await appelApi(`/enseignant/ec/${ecSelectionneCourant.id_EC}/etudiants?annee=${encodeURIComponent(annee)}`);
     afficherTableauEtudiants();
   } catch (erreur) {
     afficherMessage('messageErreur', erreur.message);

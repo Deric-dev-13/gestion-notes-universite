@@ -368,9 +368,47 @@ async function obtenirNotificationsEnseignant(id_enseignant, annee_universitaire
   }
 
   if (etudiantsEnDette > 0) {
+    // Détail : une ligne par dette, avec l'année et le niveau d'origine de la dette
+    const [dettesRows] = await pool.query(
+      `SELECT e.numero_etudiant, e.nom_etudiant, e.prenom_etudiant,
+              p.nom_parcours, p.niveau,
+              ec.nom_EC, d.annee_universitaire_origine,
+              po.niveau AS niveau_origine
+       FROM DETTE d
+       JOIN ETUDIANT e ON e.numero_etudiant = d.numero_etudiant
+       LEFT JOIN PARCOURS p ON p.id_parcours = e.id_parcours
+       JOIN ELEMENT_CONSTITUTIF ec ON ec.id_EC = d.id_EC
+       JOIN ENSEIGNER en ON en.id_EC = ec.id_EC AND en.id_enseignant = ?
+       LEFT JOIN INSCRIPTION io ON io.numero_etudiant = d.numero_etudiant
+         AND io.annee_universitaire = d.annee_universitaire_origine
+       LEFT JOIN PARCOURS po ON po.id_parcours = io.id_parcours
+       WHERE d.statut = 'En cours'
+       ORDER BY e.nom_etudiant, e.prenom_etudiant, ec.nom_EC`,
+      [id_enseignant]
+    );
+
+    // Regroupement : un élément par étudiant avec la liste de ses EC en dette
+    const parEtudiant = new Map();
+    for (const r of dettesRows) {
+      if (!parEtudiant.has(r.numero_etudiant)) {
+        parEtudiant.set(r.numero_etudiant, {
+          etudiant: `${r.nom_etudiant} ${r.prenom_etudiant || ''}`.trim(),
+          parcours: r.nom_parcours || 'Non renseigné',
+          niveau: r.niveau || '-',
+          ecs: []
+        });
+      }
+      parEtudiant.get(r.numero_etudiant).ecs.push({
+        nom: r.nom_EC,
+        annee: r.annee_universitaire_origine || '-',
+        niveau: r.niveau_origine || '-'
+      });
+    }
+
     notifications.push({
       id: 'etudiants-en-dette',
-      texte: `${etudiantsEnDette} étudiant${etudiantsEnDette > 1 ? 's' : ''} sont en dette sur vos EC.`
+      texte: `${etudiantsEnDette} étudiant${etudiantsEnDette > 1 ? 's' : ''} en dette sur vos EC :`,
+      details: Array.from(parEtudiant.values())
     });
   }
 
@@ -695,7 +733,24 @@ async function listerNotesEtudiantEC(numero_etudiant, id_EC, annee_universitaire
 // combinés : au lieu de faire une requête EVALUER par étudiant (N+1), on récupère
 // tous les étudiants concernés par cet EC/année ET toutes leurs notes en un seul
 // LEFT JOIN, puis on regroupe les notes par étudiant côté JavaScript.
-async function listerEtudiantsEtNotesPourECEtAnnee(id_EC, annee_universitaire) {
+async function listerEtudiantsEtNotesPourECEtAnnee(id_EC, annee_universitaire, id_parcours = null) {
+  const filtreParcours = id_parcours ? 'AND i.id_parcours = ?' : '';
+  const [rows] = await pool.query(
+    `SELECT DISTINCT e.numero_etudiant, e.nom_etudiant, e.prenom_etudiant,
+            ev.id_note, ev.id_evaluation, ev.note, ev.date_evaluation, ev.type_evaluation, ev.id_enseignant_saisie
+     FROM ETUDIANT e
+     JOIN INSCRIPTION i ON i.numero_etudiant = e.numero_etudiant AND i.annee_universitaire = ?
+     JOIN CONTENIR c ON c.id_parcours = i.id_parcours
+     JOIN ELEMENT_CONSTITUTIF ec ON ec.id_UE = c.id_UE
+     LEFT JOIN EVALUER ev ON ev.numero_etudiant = e.numero_etudiant
+                          AND ev.id_EC = ec.id_EC
+                          AND ev.annee_universitaire = ?
+     WHERE ec.id_EC = ? AND e.actif = 1 ${filtreParcours}
+     ORDER BY e.nom_etudiant, ev.date_evaluation`,
+    id_parcours ? [annee_universitaire, annee_universitaire, id_EC, id_parcours] : [annee_universitaire, annee_universitaire, id_EC]
+  );
+
+/*async function listerEtudiantsEtNotesPourECEtAnnee(id_EC, annee_universitaire) {
   const [rows] = await pool.query(
     `SELECT DISTINCT e.numero_etudiant, e.nom_etudiant, e.prenom_etudiant,
             ev.id_note, ev.id_evaluation, ev.note, ev.date_evaluation, ev.type_evaluation, ev.id_enseignant_saisie
@@ -709,7 +764,7 @@ async function listerEtudiantsEtNotesPourECEtAnnee(id_EC, annee_universitaire) {
      WHERE ec.id_EC = ? AND e.actif = 1
      ORDER BY e.nom_etudiant, ev.date_evaluation`,
     [annee_universitaire, annee_universitaire, id_EC]
-  );
+  );*/
 
   // Regroupement : une ligne par étudiant, avec son tableau de notes
   const parEtudiant = new Map();

@@ -72,7 +72,10 @@ async function getEtudiantsEtNotes(req, res) {
 
     // Une seule requête (LEFT JOIN) au lieu d'une requête par étudiant :
     // évite le pattern N+1, important pour les EC avec beaucoup d'étudiants.
-    const resultat = await modele.listerEtudiantsEtNotesPourECEtAnnee(id_EC, annee);
+    const id_parcours = req.query.id_parcours ? parseInt(req.query.id_parcours, 10) : null;
+    if (req.query.id_parcours && Number.isNaN(id_parcours)) return res.status(400).json({ message: 'Parcours invalide.' });
+    const resultat = await modele.listerEtudiantsEtNotesPourECEtAnnee(id_EC, annee, id_parcours);
+   // const resultat = await modele.listerEtudiantsEtNotesPourECEtAnnee(id_EC, annee);
     return res.json(resultat);
   } catch (erreur) {
     console.error(erreur);

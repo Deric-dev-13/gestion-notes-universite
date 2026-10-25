@@ -9,6 +9,34 @@ const fs = require('fs');
 const path = require('path');
 const PDFDocument = require('pdfkit');
 
+// ─── Textes affichés sur le PDF (la base de données reste inchangée) ───
+// Format : 'Nom EXACT en base' : 'Texte à afficher sur le PDF'
+const AFFICHAGE_MENTION = {
+  'EADIMI': 'EDUCATION APPRENTISSAGE DIDACTIQUE ET INGENIERIE EN MATHEMATIQUE-INFORMATIQUE',
+  'EADIM': 'EDUCATION APPRENTISSAGE DIDACTIQUE ET INGENIERIE EN MECANIQUE',
+  'EADIGC-SM': 'EDUCATION APPRENTISSAGE DIDACTIQUE ET INGENIERIE EN GENIE CIVIL ET SUTRICTURE-METALIQUE',
+  'EADIEE': 'EDUCATION APPRENTISSAGE DIDACTIQUE ET INGENIERIE EN ELECTRIQUE',
+  'EADISS': 'EDUCATION APPRENTISSAGE DIDACTIQUE ET INGENIERIE EN SCIENCE SOCIALE',
+  'MEF': 'MEF',
+};
+
+const AFFICHAGE_PARCOURS = {
+  // ... ajoute une ligne par parcours
+  'PEG- Informatique (IAD)': 'PROFESSORAT D\'ENSEIGNEMENT EN GENIE INFORMATIQUE',
+  'PEG-Informatique': 'PROFESSORAT D\'ENSEIGNEMENT EN GENIE INFORMATIQUE',
+  'PEG-Informatique (IAD)': 'PROFESSORAT D\'ENSEIGNEMENT EN GENIE INFORMATIQUE',
+  'PEG-Informatique (MSI)': 'PROFESSORAT D\'ENSEIGNEMENT EN GENIE INFORMATIQUE',
+  'PEG-Mathématiques': 'PROFESSORAT D\'ENSEIGNEMENT EN GENIE MATHEMATIQUE',
+  'PEG-Mathématiques (MD)': 'PROFESSORAT D\'ENSEIGNEMENT EN GENIE MATHEMATIQUE',
+  'PEG-Mathématiques (MS)': 'PROFESSORAT D\'ENSEIGNEMENT EN GENIE MATHEMATIQUE',
+  'Tronc Commun': 'PROFESSORAT D\'ENSEIGNEMENT EN GENIE MATHEMATIQUE ET INFORMATIQUE',
+
+  'PEG-Électrique': 'PROFESSORAT D\'ENSEIGNEMENT EN GENIE ELECTRIQUE',
+};
+
+const texteMention  = (m) => AFFICHAGE_MENTION[(m || '').trim()]  || m;
+const texteParcours = (p) => AFFICHAGE_PARCOURS[(p || '').trim()] || p;
+
 function genererMention(moyenne) {
   if (moyenne === null || isNaN(moyenne)) return 'N/A';
   if (moyenne >= 16) return 'Très Bien';
@@ -145,8 +173,11 @@ function genererPDFReleve({ res, infosEtudiant, annee, session, semestre, releve
   const sessionNormalisee = semestreDemande
     ? (donneesSemestreDemande && donneesSemestreDemande.aRattrapage ? 'rattrapage' : 'normale')
     : (session === 'rattrapage' ? 'rattrapage' : 'normale');
-  const mentionEtudiant = releve.mention || infosEtudiant.mention || 'Mention non renseignée';
+  //const mentionEtudiant = releve.mention || infosEtudiant.mention || 'Mention non renseignée';
+  const mentionBase = releve.mention || infosEtudiant.mention || '';
+  const mentionEtudiant = texteMention(mentionBase) || 'Mention non renseignée';
   const departementTexte = `Département de ${mentionEtudiant}`;
+ 
 
   const doc = new PDFDocument({
     size: 'A4',
@@ -171,7 +202,7 @@ function genererPDFReleve({ res, infosEtudiant, annee, session, semestre, releve
   const pageHeight = 595.28;
   const margin = 22;
   const contentWidth = pageWidth - margin * 2;
-  const diplomePrepare = /^L/i.test(releve.niveau || '') ? 'LAPEN' : /^M/i.test(releve.niveau || '') ? 'MAPEN' : 'Non renseigne';
+  const diplomePrepare = /^L/i.test(releve.niveau || '') ? 'LAPEN (Licence d’Aptitude au Professorat de l’École Normale)' : /^M/i.test(releve.niveau || '') ? 'MAPEN (Master d’Aptitude au Professorat de l’École Normale)' : 'Non renseigne';
   const dateNaissance = formaterDateNaissance(infosEtudiant.date_naissance);
   const dateEtLieuNaissance = [dateNaissance, infosEtudiant.lieu_naissance].filter(Boolean).join(' \u00e0 ') || 'Non renseigne';
   const dessinerBordureOrnementale = (y, bas = false) => {
@@ -211,7 +242,8 @@ function genererPDFReleve({ res, infosEtudiant, annee, session, semestre, releve
     };
     line('Domaine : ', "SCIENCES DE L'EDUCATION", y + 47);
     line('Mention : ', mentionEtudiant, y + 58);
-    line('Parcours : ', releve.nom_parcours || 'Tronc Commun', y + 69);
+    line('Parcours : ', texteParcours(releve.nom_parcours) || 'Tronc Commun', y + 69);
+                        //releve.nom_parcours || 'Tronc Commun'
     line('Cursus : ', 'ACADEMIQUE ET PROFESSIONNALISANT', y + 80);
     doc.font('Helvetica-Bold').fontSize(7.5).fillColor('#1e3a8a')
       .text('Annee universitaire : ', pageWidth - margin - 190, y + 91, { continued: true });
@@ -271,13 +303,14 @@ function genererPDFReleve({ res, infosEtudiant, annee, session, semestre, releve
   // 3. CADRE INFORMATIONS ÉTUDIANT & SESSION (PARCOURS ET NIVEAU SÉPARÉS)
   // =====================================================================
   const cadreY = titreY + titreHeight + 4;
-  const cadreHeight = 88;
+  const cadreHeight = 50;
 
   doc.rect(margin, cadreY, contentWidth, cadreHeight).lineWidth(0.7).strokeColor('#cbd5e1').fillAndStroke('#f8fafc', '#cbd5e1');
 
   //const sessionLabel = sessionNormalisee === 'rattrapage' ? 'Session Rattrapage' : 'Session Normale';
   const sessionLabel = sessionNormalisee === 'rattrapage' ? 'Deuxième session' : 'Première session';
-  const matricule = genererMatricule(infosEtudiant.numero_etudiant, mentionEtudiant, annee);
+  const matricule = genererMatricule(infosEtudiant.numero_etudiant, mentionBase, annee);
+  //const matricule = genererMatricule(infosEtudiant.numero_etudiant, mentionEtudiant, annee);
 
   const col1X = margin + 10;
   const col2X = margin + 280;
@@ -305,24 +338,24 @@ function genererPDFReleve({ res, infosEtudiant, annee, session, semestre, releve
      .font('Helvetica-Bold').fillColor(sessionNormalisee === 'rattrapage' ? '#b45309' : '#15803d').text(sessionLabel, { continued: false });
 
   doc.font('Helvetica-Bold').fontSize(8).fillColor('#1e3a8a')
-     .text('Date et lieu de naissance : ', col1X, cadreY + 53, { continued: true })
+     .text('Date et lieu de naissance : ', col1X, cadreY + 41, { continued: true })
      .font('Helvetica').fillColor('#0f172a').text(dateEtLieuNaissance, { continued: false });
   doc.font('Helvetica-Bold').fontSize(8).fillColor('#1e3a8a')
-     .text('Diplome prepare : ', col2X, cadreY + 53, { continued: true })
+     .text('Diplome prepare : ', col2X, cadreY + 41, { continued: true })
      .font('Helvetica').fillColor('#0f172a').text(diplomePrepare, { continued: false });
   // Formation séparée : mention, niveau puis parcours.
-  doc.font('Helvetica-Bold').fontSize(8).fillColor('#1e3a8a')
-      .text('Mention : ', col1X, cadreY + 41, { continued: true })
-     .font('Helvetica').fillColor('#0f172a').text(mentionEtudiant, { continued: false });
+ // doc.font('Helvetica-Bold').fontSize(8).fillColor('#1e3a8a')
+     // .text('Mention : ', col1X, cadreY + 41, { continued: true })
+    // .font('Helvetica').fillColor('#0f172a').text(mentionEtudiant, { continued: false });
 
   doc.font('Helvetica-Bold').fontSize(8).fillColor('#1e3a8a')
       .text('Niveau : ', col2X, cadreY + 29, { continued: true })
       .font('Helvetica-Bold').fillColor('#1e3a8a').text(releve.niveau, { continued: false });
 
-      doc.font('Helvetica-Bold').fontSize(8).fillColor('#1e3a8a')
-        .text('Parcours : ', col2X, cadreY + 41, { continued: true })
-      .font('Helvetica').fillColor('#0f172a').text(releve.nom_parcours || 'Tronc Commun', { continued: false });
-
+     // doc.font('Helvetica-Bold').fontSize(8).fillColor('#1e3a8a')
+       // .text('Parcours : ', col2X, cadreY + 41, { continued: true })
+      //.font('Helvetica').fillColor('#0f172a').text(texteParcours(releve.nom_parcours) || 'Tronc Commun', { continued: false });
+                                                                   //releve.nom_parcours || 'Tronc Commun'
   // =====================================================================
   // 4. TABLEAU DES NOTES AVEC SEMESTRES REMARQUABLES
   // =====================================================================
@@ -405,7 +438,8 @@ function genererPDFReleve({ res, infosEtudiant, annee, session, semestre, releve
     label('Prenom : ', leftX, infoY + 29, infosEtudiant.prenom_etudiant);
     label('Niveau : ', rightX, infoY + 29, releve.niveau);
     label('Mention : ', leftX, infoY + 41, mentionEtudiant);
-    label('Parcours : ', rightX, infoY + 41, releve.nom_parcours || 'Tronc Commun');
+    label('Parcours : ', rightX, infoY + 41, texteParcours(releve.nom_parcours) || 'Tronc Commun');
+                                              //releve.nom_parcours || 'Tronc Commun'
     label('Date et lieu de naissance : ', leftX, infoY + 53, dateEtLieuNaissance);
     label('Diplome prepare : ', rightX, infoY + 53, diplomePrepare);
     return infoY + infoH + 5;
@@ -514,13 +548,14 @@ function genererPDFReleve({ res, infosEtudiant, annee, session, semestre, releve
        .text('Antsiranana, le ' + dateStr, margin, syntheseY + 13, { width: contentWidth, align: 'right' });
     const sigY = Math.min(syntheseY + 31, pageHeight - margin - 48);
     const sigW = (contentWidth - 16) / 2;
-    doc.rect(margin, sigY, sigW, 34).lineWidth(0.6).strokeColor('#94a3b8').fillAndStroke('#fafafa', '#94a3b8');
+    //doc.rect(margin, sigY, sigW, 34).lineWidth(0.6).strokeColor('#94a3b8').fillAndStroke('#fafafa', '#94a3b8');
+    doc.rect(margin, sigY, sigW, 34).lineWidth(0.6).strokeColor('#fff').fillAndStroke('#fff', '#fff');
     doc.font('Helvetica-Bold').fontSize(7).fillColor('#1e3a8a')
        .text('Responsable du parcours : ' + (releve.responsable_parcours || 'A renseigner'), margin + 4, sigY + 5, { width: sigW - 8, align: 'center' });
     doc.font('Helvetica-Oblique').fontSize(6).fillColor('#64748b')
        .text('Signature et cachet', margin + 4, sigY + 23, { width: sigW - 8, align: 'center' });
     const sig2X = margin + sigW + 16;
-    doc.rect(sig2X, sigY, sigW, 34).lineWidth(0.6).strokeColor('#94a3b8').fillAndStroke('#fafafa', '#94a3b8');
+    doc.rect(sig2X, sigY, sigW, 34).lineWidth(0.6).strokeColor('#fff').fillAndStroke('#fff', '#fff');
     doc.font('Helvetica-Bold').fontSize(7).fillColor('#1e3a8a')
        .text('Responsable de la mention : ' + (releve.responsable_mention || 'A renseigner'), sig2X + 4, sigY + 5, { width: sigW - 8, align: 'center' });
     doc.font('Helvetica-Oblique').fontSize(6).fillColor('#64748b')

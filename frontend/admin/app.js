@@ -189,10 +189,10 @@ if (nomAdmin) {
   nomAdmin.textContent = `${localStorage.getItem('prenom') || ''} ${localStorage.getItem('nom') || ''}`.trim();
 }
 
-const btnDeconnexion = getElement('btnDeconnexion');
+/*const btnDeconnexion = getElement('btnDeconnexion');
 if (btnDeconnexion) {
   btnDeconnexion.addEventListener('click', deconnexion);
-}
+}*/
 
 const notificationAdmin = getElement('notification');
 if (notificationAdmin) {
