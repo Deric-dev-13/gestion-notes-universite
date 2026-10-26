@@ -446,3 +446,5 @@ main.releve-main { max-width: 1500px; }
 .statut-redouble { border-color: #fca5a5; } .statut-redouble h4 { color: #991b1b; } .statut-redouble.actif { background: #fee2e2; }
 .badge-en-cours { background: #dbeafe; color: #1d4ed8; }
 .badge-dette { background: #fef9c3; color: #854d0e; }
+/* Icône profil (admin) */
+.btnProfilDetails:hover { background-color: #bfdbfe; }

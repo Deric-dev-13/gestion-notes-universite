@@ -18,6 +18,10 @@
 const API_BASE_URL = `https://91a7f487a9f82378a7cebf247d196bfb.loophole.site/api`;
 //const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:5000/api`;
 
+//const API_BASE_URL = ``;
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:5000/api`;
+
+
 // --- Gestion du token dans le stockage du navigateur ---
 // On utilise localStorage pour que la session survive au rechargement
 // de la page (contrairement à une simple variable JS).

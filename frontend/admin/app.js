@@ -754,7 +754,11 @@ function afficherEnseignantsFiltres() {
       <tr>
         <td class="px-3 py-2">${enseignant.id_enseignant}</td>
         <td class="px-3 py-2">${enseignant.nom_enseignant} ${enseignant.prenom_enseignant}</td>
-        <td class="px-3 py-2 text-xs leading-5">Sexe : ${enseignant.sexe || '-'}<br>Date naissance : ${formaterDate(enseignant.date_naissance)}<br>CIN : ${enseignant.cin || '-'}<br>Tél. : ${enseignant.tel_enseignant || '-'}<br>Matricule : ${enseignant.matricule_enseignant || '-'}<br>Diplôme : ${enseignant.diplome || '-'}<br>Grade : ${enseignant.grade || '-'}<br>Spécialité : ${enseignant.specialite || '-'}<br>Établissement : ${enseignant.mention_etabisement_attache || '-'}<br>Responsabilite demandee : ${enseignant.role_responsabilite_demande || '-'}<br>Parcours concernes : ${enseignant.noms_parcours_responsabilite || '-'}</td>
+        <!--<td class="px-3 py-2 text-xs leading-5">Sexe : ${enseignant.sexe || '-'}<br>Date naissance : ${formaterDate(enseignant.date_naissance)}<br>CIN : ${enseignant.cin || '-'}<br>Tél. : ${enseignant.tel_enseignant || '-'}<br>Matricule : ${enseignant.matricule_enseignant || '-'}<br>Diplôme : ${enseignant.diplome || '-'}<br>Grade : ${enseignant.grade || '-'}<br>Spécialité : ${enseignant.specialite || '-'}<br>Établissement : ${enseignant.mention_etabisement_attache || '-'}<br>Responsabilite demandee : ${enseignant.role_responsabilite_demande || '-'}<br>Parcours concernes : ${enseignant.noms_parcours_responsabilite || '-'}</td>-->
+        <td class="px-3 py-2">
+         <button type="button" class="btnProfilDetails inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-900 hover:bg-blue-200" title="Voir le profil" aria-expanded="false">👤</button>
+         <div class="profilDetails hidden mt-2 text-xs leading-5">Sexe : ${enseignant.sexe || '-'}<br>Date naissance : ${formaterDate(enseignant.date_naissance)}<br>CIN : ${enseignant.cin || '-'}<br>Tél. : ${enseignant.tel_enseignant || '-'}<br>Matricule : ${enseignant.matricule_enseignant || '-'}<br>Diplôme : ${enseignant.diplome || '-'}<br>Grade : ${enseignant.grade || '-'}<br>Spécialité : ${enseignant.specialite || '-'}<br>Établissement : ${enseignant.mention_etabisement_attache || '-'}<br>Responsabilite demandee : ${enseignant.role_responsabilite_demande || '-'}<br>Parcours concernes : ${enseignant.noms_parcours_responsabilite || '-'}</div>
+        </td>
         <td class="px-3 py-2">${enseignant.email_enseignant}</td>
         <td class="px-3 py-2">${enseignant.actif ? '<span class="badge badge-valide">Actif</span>' : '<span class="badge badge-compensation">En attente</span>'}</td>
         <td class="px-3 py-2 space-x-2">
@@ -908,7 +912,11 @@ function afficherEtudiantsFiltres() {
         <tr>
           <td class="px-3 py-2">${etu.numero_etudiant}</td>
           <td class="px-3 py-2">${etu.nom_etudiant} ${etu.prenom_etudiant}</td>
-          <td class="px-3 py-2 text-xs leading-5">Sexe : ${etu.sexe || '-'}<br>Date naissance : ${formaterDate(etu.date_naissance)}<br>CIN : ${etu.cin || '-'}<br>Tél. : ${etu.tel_etudiant || '-'}</td>
+          <!--<td class="px-3 py-2 text-xs leading-5">Sexe : ${etu.sexe || '-'}<br>Date naissance : ${formaterDate(etu.date_naissance)}<br>CIN : ${etu.cin || '-'}<br>Tél. : ${etu.tel_etudiant || '-'}</td>-->
+          <td class="px-3 py-2">
+            <button type="button" class="btnProfilDetails inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-900 hover:bg-blue-200" title="Voir le profil" aria-expanded="false">👤</button>
+            <div class="profilDetails hidden mt-2 text-xs leading-5">Sexe : ${etu.sexe || '-'}<br>Date naissance : ${formaterDate(etu.date_naissance)}<br>CIN : ${etu.cin || '-'}<br>Tél. : ${etu.tel_etudiant || '-'}</div>
+          </td>
           <td class="px-3 py-2">${etu.email_etudiant}</td>
           <td class="px-3 py-2">${parcours ? `${parcours.nom_parcours} (${parcours.niveau})` : '-'}</td>
           <td class="px-3 py-2">${etu.actif ? '<span class="badge badge-valide">Actif</span>' : '<span class="badge badge-compensation">En attente</span>'}</td>
@@ -1510,6 +1518,19 @@ const btnRafraichirDemandes = getElement('btnRafraichirDemandes');
 if (btnRafraichirDemandes) {
   btnRafraichirDemandes.addEventListener('click', chargerDemandesReinitialisation);
 }
+
+
+// Icône « profil » : affiche / masque les informations détaillées dans la cellule
+document.addEventListener('click', (event) => {
+  const bouton = event.target.closest('.btnProfilDetails');
+  if (!bouton) return;
+  const details = bouton.parentElement.querySelector('.profilDetails');
+  if (!details) return;
+  const ouvert = !details.classList.contains('hidden');
+  details.classList.toggle('hidden', ouvert);
+  bouton.setAttribute('aria-expanded', String(!ouvert));
+  bouton.title = ouvert ? 'Voir le profil' : 'Masquer le profil';
+});
 
 // --------------------------------------------------------------
 // 10. Chargement initial
