@@ -364,6 +364,7 @@
       ongletEtudiant.classList.add('text-gray-600');
       formEnseignant.classList.remove('hidden');
       formEtudiant.classList.add('hidden');
+      chargerCatalogueEC();
     });
 
     // -------------------------------------------------------------
@@ -371,16 +372,15 @@
     // -------------------------------------------------------------
     let catalogueEC = [];
     let listeParcours = [];
+    let catalogueECCharge = false;
+    let chargementCatalogueEC = null;
     const ecsSelectionnes = new Set();
 
     async function chargerDonnees() {
       try {
-        const [parcours, catalogue] = await Promise.all([
-          appelApi('/auth/parcours'),
-          appelApi('/auth/catalogue-ec')
-        ]);
+        const parcours = await appelApi('/auth/parcours');
+        if (!Array.isArray(parcours)) throw new Error('La réponse des parcours est invalide.');
         listeParcours = parcours;
-        catalogueEC = catalogue;
 
         // Remplir les mentions pour les filtres étudiant et enseignant
         const mentionsUniques = [...new Set(listeParcours.map((p) => p.mention || '').filter(Boolean))].sort();
@@ -402,8 +402,31 @@
         mettreAJourSelectParcours();
         afficherListeEC();
       } catch (erreur) {
-        afficherMessage('messageErreur', 'Impossible de charger les données académiques.');
+        console.error('Erreur lors du chargement des parcours académiques :', erreur);
+        afficherMessage('messageErreur', 'Impossible de charger les parcours pour l’inscription.');
       }
+    }
+
+    async function chargerCatalogueEC() {
+      if (catalogueECCharge) return;
+      if (chargementCatalogueEC) return chargementCatalogueEC;
+
+      chargementCatalogueEC = (async () => {
+        try {
+          const catalogue = await appelApi('/auth/catalogue-ec');
+          if (!Array.isArray(catalogue)) throw new Error('La réponse du catalogue EC est invalide.');
+          catalogueEC = catalogue;
+          catalogueECCharge = true;
+          afficherListeEC();
+        } catch (erreur) {
+          console.error('Erreur lors du chargement du catalogue EC :', erreur);
+          afficherMessage('messageErreur', 'Impossible de charger le catalogue des éléments constitutifs pour le formulaire enseignant.');
+        } finally {
+          chargementCatalogueEC = null;
+        }
+      })();
+
+      return chargementCatalogueEC;
     }
 
     // On garde les parcours cochés dans un Set séparé (pas seulement dans
