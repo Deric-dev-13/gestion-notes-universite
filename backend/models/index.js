@@ -1267,7 +1267,7 @@ async function listerCatalogueECComplet() {
      JOIN UNITE_ENSEIGNEMENT ue ON ue.id_UE = ec.id_UE
      JOIN CONTENIR c ON c.id_UE = ue.id_UE
      JOIN PARCOURS p ON p.id_parcours = c.id_parcours
-     ORDER BY p.niveau, p.nom_parcours, ue.semestre, ec.nom_EC`
+     ORDER BY niveau, p.nom_parcours, ue.semestre, ec.nom_EC`
   );
   return rows;
 }
@@ -1471,4 +1471,3 @@ module.exports = {
   // historique
   figerResultat
 };
-
