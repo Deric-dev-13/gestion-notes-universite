@@ -15,7 +15,7 @@
 // chargée (fonctionne que ce soit localhost, une IP locale changeante, ou
 // un vrai nom de domaine en production). Une IP codée en dur casserait
 // l'application dès que la machine change de réseau ou d'adresse.
-const API_BASE_URL = `https://a2b4ed71998120020eb7dd9934838cfc.loophole.site/api`;
+const API_BASE_URL = ` https://gestion-notes-universite.onrender.com/api`;
 //const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:5000/api`;
 
 //const API_BASE_URL = ``;
