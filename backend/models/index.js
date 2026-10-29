@@ -1315,7 +1315,7 @@ async function listerDemandesReinitialisation(statut = null) {
 // (logique commune entre la confirmation automatique par lien et un
 // traitement manuel éventuel par l'admin).
 async function appliquerMotDePasseDemande(demande) {
-  const bcrypt = require('bcrypt');
+  const bcrypt = require('bcryptjs');
   const hash = await bcrypt.hash(demande.mot_de_passe_souhaite, 10);
 
   if (demande.role === 'etudiant') {

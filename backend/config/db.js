@@ -14,16 +14,16 @@ const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
-  port: process.env.DB_PORT || 17922, //3306,
+  port: process.env.DB_PORT || 3306,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   charset: 'utf8mb4', // essentiel pour les accents français (é, è, à...) : sans ceci, certains clients MySQL retombent sur un charset qui déforme les caractères accentués
   dateStrings: true,  // renvoie les dates (DATE, DATETIME) sous forme de chaînes 'YYYY-MM-DD' au lieu d'objets Date JS avec décalage ISO
   waitForConnections: true, // si toutes les connexions sont occupées, on attend au lieu de planter
-  ssl: {
+  /*ssl: {
     rejectUnauthorized: false
-  },
+  },*/
   // connectionLimit : nombre max de connexions simultanées vers MySQL.
   // 10 est le défaut mysql2, trop faible pour beaucoup d'utilisateurs simultanés
   // (chaque requête HTTP peut occuper une connexion pendant tout son traitement).

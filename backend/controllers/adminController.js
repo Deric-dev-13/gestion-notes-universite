@@ -8,7 +8,7 @@
 //  - Affectation enseignants <-> EC, inscription étudiants <-> parcours
 // =====================================================================
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const modele = require('../models');
 const { envoyerEmail } = require('../utils/emailSender');
 

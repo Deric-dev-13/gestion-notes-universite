@@ -8,7 +8,7 @@
 // token JWT contenant le rôle et l'id de l'utilisateur.
 // =====================================================================
 
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const modele = require('../models');
