@@ -21,6 +21,7 @@ const pool = mysql.createPool({
   charset: 'utf8mb4', // essentiel pour les accents français (é, è, à...) : sans ceci, certains clients MySQL retombent sur un charset qui déforme les caractères accentués
   dateStrings: true,  // renvoie les dates (DATE, DATETIME) sous forme de chaînes 'YYYY-MM-DD' au lieu d'objets Date JS avec décalage ISO
   waitForConnections: true, // si toutes les connexions sont occupées, on attend au lieu de planter
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
   /*ssl: {
     rejectUnauthorized: false
   },*/
