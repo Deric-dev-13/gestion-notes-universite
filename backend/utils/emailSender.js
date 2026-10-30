@@ -1,27 +1,35 @@
-const Brevo = require('@getbrevo/brevo');
-
 async function envoyerEmail({ destinataire, sujet, texte }) {
   if (!destinataire) throw new Error('Adresse email du destinataire manquante.');
   if (!process.env.BREVO_API_KEY) {
-    throw new Error("Configuration manquante. Définissez BREVO_API_KEY dans vos variables d'environnement.");
+    throw new Error("Configuration manquante. Définissez BREVO_API_KEY.");
   }
 
-  // Initialisation correcte pour la dernière version du SDK
-  const apiInstance = new Brevo.TransactionalEmailsApi();
-  
-  // Configuration de la clé API
-  apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
+  // Requête HTTP directe sur l'API de Brevo (Zéro dépendance, impossible de casser)
+  const response = await fetch('https://brevo.com', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'api-key': process.env.BREVO_API_KEY,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify({
+      sender: { name: "Gestion de Notes", email: process.env.SMTP_USER },
+      to: [{ email: destinataire }],
+      subject: sujet,
+      textContent: texte
+    })
+  });
 
-  const sendSmtpEmail = new Brevo.SendSmtpEmail();
-  sendSmtpEmail.subject = sujet;
-  sendSmtpEmail.textContent = texte;
-  sendSmtpEmail.sender = { name: "Gestion de Notes", email: process.env.SMTP_USER };
-  sendSmtpEmail.to = [{ email: destinataire }];
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(`Erreur Brevo API: ${JSON.stringify(errorData)}`);
+  }
 
-  return apiInstance.sendTransacEmail(sendSmtpEmail);
+  return await response.json();
 }
 
 module.exports = { envoyerEmail };
+
 
 
 /*const nodemailer = require('nodemailer');
