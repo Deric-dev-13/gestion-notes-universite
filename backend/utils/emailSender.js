@@ -1,29 +1,21 @@
 const Brevo = require('@getbrevo/brevo');
 
-function obtenirClientApi() {
-  const apiKey = process.env.BREVO_API_KEY;
-  if (!apiKey) {
+async function envoyerEmail({ destinataire, sujet, texte }) {
+  if (!destinataire) throw new Error('Adresse email du destinataire manquante.');
+  if (!process.env.BREVO_API_KEY) {
     throw new Error("Configuration manquante. Définissez BREVO_API_KEY dans vos variables d'environnement.");
   }
 
-  const defaultClient = Brevo.ApiClient.instance;
-  const apiKeyInstance = defaultClient.authentications['api-key'];
-  apiKeyInstance.apiKey = apiKey;
+  // Initialisation moderne et propre de l'API
+  const apiInstance = new Brevo.TransactionalEmailsApi();
+  apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
-  return new Brevo.TransactionalEmailsApi();
-}
-
-async function envoyerEmail({ destinataire, sujet, texte }) {
-  if (!destinataire) throw new Error('Adresse email du destinataire manquante.');
-
-  const apiInstance = obtenirClientApi();
-  const sendSmtpEmail = new Brevo.SendSmtpEmail();
-
-  sendSmtpEmail.subject = sujet;
-  sendSmtpEmail.textContent = texte;
-  // Utilise l'adresse configurée sur Render comme expéditeur
-  sendSmtpEmail.sender = { name: "Gestion de Notes", email: process.env.SMTP_USER };
-  sendSmtpEmail.to = [{ email: destinataire }];
+  const sendSmtpEmail = {
+    subject: sujet,
+    textContent: texte,
+    sender: { name: "Gestion de Notes", email: process.env.SMTP_USER },
+    to: [{ email: destinataire }]
+  };
 
   return apiInstance.sendTransacEmail(sendSmtpEmail);
 }
