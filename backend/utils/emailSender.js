@@ -1,20 +1,23 @@
 async function envoyerEmail({ destinataire, sujet, texte }) {
   if (!destinataire) throw new Error('Adresse email du destinataire manquante.');
-  if (!process.env.BREVO_API_KEY) {
-    throw new Error("Configuration manquante. Définissez BREVO_API_KEY.");
+  
+  const apiKey = process.env.BREVO_API_KEY;
+  const smtpUser = process.env.SMTP_USER;
+
+  if (!apiKey || !smtpUser) {
+    throw new Error("Configuration e-mail incomplète sur Render.");
   }
 
-  // Requête HTTP directe sur l'API de Brevo (Zéro dépendance, impossible de casser)
   const response = await fetch('https://brevo.com', {
     method: 'POST',
     headers: {
       'accept': 'application/json',
-      'api-key': process.env.BREVO_API_KEY,
+      'api-key': apiKey.trim(),
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      sender: { name: "Gestion de Notes", email: process.env.SMTP_USER },
-      to: [{ email: destinataire }],
+      sender: { name: "Gestion de Notes", email: smtpUser.trim() },
+      to: [{ email: destinataire.trim() }],
       subject: sujet,
       textContent: texte
     })
@@ -29,6 +32,7 @@ async function envoyerEmail({ destinataire, sujet, texte }) {
 }
 
 module.exports = { envoyerEmail };
+
 
 
 
