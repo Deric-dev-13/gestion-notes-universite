@@ -6,16 +6,17 @@ async function envoyerEmail({ destinataire, sujet, texte }) {
     throw new Error("Configuration manquante. Définissez BREVO_API_KEY dans vos variables d'environnement.");
   }
 
-  // Initialisation moderne et propre de l'API
+  // Initialisation correcte pour la dernière version du SDK
   const apiInstance = new Brevo.TransactionalEmailsApi();
+  
+  // Configuration de la clé API
   apiInstance.setApiKey(Brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
-  const sendSmtpEmail = {
-    subject: sujet,
-    textContent: texte,
-    sender: { name: "Gestion de Notes", email: process.env.SMTP_USER },
-    to: [{ email: destinataire }]
-  };
+  const sendSmtpEmail = new Brevo.SendSmtpEmail();
+  sendSmtpEmail.subject = sujet;
+  sendSmtpEmail.textContent = texte;
+  sendSmtpEmail.sender = { name: "Gestion de Notes", email: process.env.SMTP_USER };
+  sendSmtpEmail.to = [{ email: destinataire }];
 
   return apiInstance.sendTransacEmail(sendSmtpEmail);
 }
