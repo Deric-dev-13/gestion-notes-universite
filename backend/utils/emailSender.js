@@ -1,42 +1,4 @@
-async function envoyerEmail({ destinataire, sujet, texte }) {
-  if (!destinataire) throw new Error('Adresse email du destinataire manquante.');
-  
-  const apiKey = process.env.BREVO_API_KEY;
-  const smtpUser = process.env.SMTP_USER;
-
-  if (!apiKey || !smtpUser) {
-    throw new Error("Configuration e-mail incomplète sur Render.");
-  }
-
-  const response = await fetch('https://brevo.com', {
-    method: 'POST',
-    headers: {
-      'accept': 'application/json',
-      'api-key': apiKey.trim(),
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify({
-      sender: { name: "Gestion de Notes", email: smtpUser.trim() },
-      to: [{ email: destinataire.trim() }],
-      subject: sujet,
-      textContent: texte
-    })
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`Erreur Brevo API: ${JSON.stringify(errorData)}`);
-  }
-
-  return await response.json();
-}
-
-module.exports = { envoyerEmail };
-
-
-
-
-/*const nodemailer = require('nodemailer');
+const nodemailer = require('nodemailer');
 
 function obtenirTransporteur() {
   const host = process.env.SMTP_HOST;
@@ -70,4 +32,4 @@ async function envoyerEmail({ destinataire, sujet, texte }) {
   });
 }
 
-module.exports = { envoyerEmail };*/
+module.exports = { envoyerEmail };
